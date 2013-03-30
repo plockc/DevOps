@@ -42,6 +42,7 @@ locale-gen # edit /etc/locate.gen possibly
 # install network device is eth0 but runtime is emp0s5, so have to do it manually
 ln -s '/usr/lib/systemd/system/dhcpcd\@.service' '/etc/systemd/system/multi-user.target.wants/dhcpcd\@enp0s5.service'
 systemctl enable sshd.service
+systemctl enable lighttpd
 exit # exit the chroot
 EOF
 

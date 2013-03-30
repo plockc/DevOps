@@ -39,7 +39,8 @@ ln -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 locale-gen # edit /etc/locate.gen possibly
 #systemctl enable dhcpcd@enp0s5
-systemctl enable dhcpcd@eth0.service
+# install network device is eth0 but runtime is emp0s5, so have to do it manually
+ln -s '/usr/lib/systemd/system/dhcpcd\@.service' '/etc/systemd/system/multi-user.target.wants/dhcpcd\@enp0s5.service'
 systemctl enable sshd.service
 exit # exit the chroot
 EOF

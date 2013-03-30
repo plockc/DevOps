@@ -39,9 +39,9 @@ ln -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 echo LANG=en_US.UTF-8 > /etc/locale.conf
 locale-gen # edit /etc/locate.gen possibly
 #systemctl enable dhcpcd@enp0s5
-#systemctl enable dhcpcd@eth0.service
+systemctl enable dhcpcd@eth0.service
 exit # exit the chroot
 EOF
 
-umount /mnt/{boot,} 
-reboot
+# umount /mnt/{boot,} 
+# reboot

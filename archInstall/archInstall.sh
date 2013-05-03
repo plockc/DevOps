@@ -13,7 +13,6 @@ partprobe /dev/sda
 mkfs.ext4 -q /dev/sda2
 mount -t ext4 /dev/sda2 /mnt
 
-
 mkfs.ext4 -q /dev/sda1
 mkdir -p /mnt/boot
 
@@ -22,7 +21,7 @@ mount -t ext4 /dev/sda1 /mnt/boot
 mkswap /dev/sda3
 swapon /dev/sda3
 
-pacstrap /mnt base base-devel openssh php-apc php-cgi php-fpm php-sqlite lighttpd dokuwiki augeas wget unzip
+pacstrap /mnt base base-devel openssh php-apc php-cgi php-fpm php-sqlite lighttpd dokuwiki augeas ntp wget unzip
 
 
 genfstab -p /mnt >> /mnt/etc/fstab
@@ -42,7 +41,14 @@ locale-gen # edit /etc/locate.gen possibly
 # install network device is eth0 but runtime is emp0s5, so have to do it manually
 ln -s '/usr/lib/systemd/system/dhcpcd\@.service' '/etc/systemd/system/multi-user.target.wants/dhcpcd\@enp0s5.service'
 systemctl enable sshd.service
-systemctl enable lighttpd
+systemctl enable lighttpd.service
+systemctl enable openntpd
+systemctl start openntpd
+
+chpasswd -e << EOF
+root:$6$BcIn6ZXm$dsIT5df3t.iNCQUbYMTVMuublLUUC0s4RjUknQfIPYtvpGlivPH9Srq4Ho/Oh1n/PoLuNHiH/C7O4nb6JC55A.
+EOF
+
 exit # exit the chroot
 EOF
 

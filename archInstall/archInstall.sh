@@ -57,7 +57,7 @@ systemctl enable lighttpd.service
 systemctl enable ntpd.service
 
 chpasswd -e << EOSF
-root:$6$BcIn6ZXm$dsIT5df3t.iNCQUbYMTVMuublLUUC0s4RjUknQfIPYtvpGlivPH9Srq4Ho/Oh1n/PoLuNHiH/C7O4nb6JC55A.
+root:\$6\$BcIn6ZXm\$dsIT5df3t.iNCQUbYMTVMuublLUUC0s4RjUknQfIPYtvpGlivPH9Srq4Ho/Oh1n/PoLuNHiH/C7O4nb6JC55A.
 EOSF
 
 exit # exit the chroot

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# USAGE: bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archInstall.sh)
+
 set -e
 
 cat /proc/mounts | grep sda && (echo Error, /dev/sda is used) || echo /dev/sda does not appear to be used
@@ -52,11 +54,11 @@ locale-gen # edit /etc/locate.gen possibly
 ln -s '/usr/lib/systemd/system/dhcpcd\@.service' '/etc/systemd/system/multi-user.target.wants/dhcpcd\@enp0s5.service'
 systemctl enable sshd.service
 systemctl enable lighttpd.service
-systemctl enable openntpd
+systemctl enable ntpd.service
 
-chpasswd -e << EOF
+chpasswd -e << EOSF
 root:$6$BcIn6ZXm$dsIT5df3t.iNCQUbYMTVMuublLUUC0s4RjUknQfIPYtvpGlivPH9Srq4Ho/Oh1n/PoLuNHiH/C7O4nb6JC55A.
-EOF
+EOSF
 
 exit # exit the chroot
 EOF

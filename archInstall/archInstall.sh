@@ -2,7 +2,7 @@
 
 set -e
 
-cat /proc/mounts | grep sda
+cat /proc/mounts | grep sda && (echo Error, /dev/sda is used) || echo /dev/sda does not appear to be used
 read -p "Are you sure you want to destroy /dev/sda? " -r
 if [[ $REPLY =~ ^[Nn]$ ]]
 then

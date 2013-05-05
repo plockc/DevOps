@@ -6,6 +6,7 @@ cat /proc/mounts | grep sda
 read -p "Are you sure you want to destroy /dev/sda? " -r
 if [[ $REPLY =~ ^[Nn]$ ]]
 then
+    echo Aborting
     exit;
 fi
 

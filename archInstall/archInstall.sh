@@ -1,5 +1,14 @@
 #!/bin/bash
 
+set -e
+
+cat /proc/mounts | grep sda
+read -p "Are you sure you want to destroy /dev/sda? " -n 1 -r
+if [[ $REPLY =~ ^[Nn]$ ]]
+then
+    exit;
+fi
+
 pacman --noconfirm -Syy ntp && ntpd -gq && hwclock -w
 
 parted --script --align optimal /dev/sda \
@@ -43,7 +52,6 @@ ln -s '/usr/lib/systemd/system/dhcpcd\@.service' '/etc/systemd/system/multi-user
 systemctl enable sshd.service
 systemctl enable lighttpd.service
 systemctl enable openntpd
-systemctl start openntpd
 
 chpasswd -e << EOF
 root:$6$BcIn6ZXm$dsIT5df3t.iNCQUbYMTVMuublLUUC0s4RjUknQfIPYtvpGlivPH9Srq4Ho/Oh1n/PoLuNHiH/C7O4nb6JC55A.

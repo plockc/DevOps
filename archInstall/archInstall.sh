@@ -3,7 +3,7 @@
 set -e
 
 cat /proc/mounts | grep sda
-read -p "Are you sure you want to destroy /dev/sda? " -n 1 -r
+read -p "Are you sure you want to destroy /dev/sda? " -r
 if [[ $REPLY =~ ^[Nn]$ ]]
 then
     exit;

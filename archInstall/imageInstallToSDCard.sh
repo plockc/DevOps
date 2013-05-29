@@ -31,5 +31,7 @@ then
     exit;
 fi
 
+newDisk=${newDisk/disk/rdisk} # use the raw disk to avoid the buffering, much faster
 sudo diskutil unmountDisk $newDisk
-sudo dd bs=1m if="$1" of=$newDisk
+echo && echo Copying Image, this will take a while
+sudo dd bs=16m if="$1" of=$newDisk

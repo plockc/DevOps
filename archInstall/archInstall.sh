@@ -2,6 +2,10 @@
 
 # USAGE: bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archInstall.sh)
 
+# TODO: request for hostname and for a initial password
+# TODO: options for a Arch package cache, or personal wiki/blog, or something else
+# TODO: make the 3GB primary larger, maybe swapping with swap to allow for end of disk
+
 set -e
 
 cat /proc/mounts | grep sda && (echo Error, /dev/sda is used) || echo /dev/sda does not appear to be used
@@ -33,8 +37,7 @@ mount -t ext4 /dev/sda1 /mnt/boot
 mkswap /dev/sda3
 swapon /dev/sda3
 
-pacstrap /mnt base base-devel openssh php-apc php-cgi php-fpm php-sqlite lighttpd dokuwiki augeas ntp wget unzip
-
+pacstrap /mnt base base-devel openssh php-apc php-cgi php-sqlite lighttpd dokuwiki augeas ntp wget darkhttpd darkstat unzip dnsutils rsync
 
 genfstab -p /mnt >> /mnt/etc/fstab
 
@@ -52,9 +55,7 @@ locale-gen # edit /etc/locate.gen possibly
 #systemctl enable dhcpcd@enp0s5
 # install network device is eth0 but runtime is emp0s5, so have to do it manually
 ln -s '/usr/lib/systemd/system/dhcpcd\@.service' '/etc/systemd/system/multi-user.target.wants/dhcpcd\@enp0s5.service'
-systemctl enable sshd.service
-systemctl enable lighttpd.service
-systemctl enable ntpd.service
+systemctl enable sshd.service darkstat ntpd.service lighttpd.service
 
 chpasswd -e << EOSF
 root:\$6\$BcIn6ZXm\$dsIT5df3t.iNCQUbYMTVMuublLUUC0s4RjUknQfIPYtvpGlivPH9Srq4Ho/Oh1n/PoLuNHiH/C7O4nb6JC55A.

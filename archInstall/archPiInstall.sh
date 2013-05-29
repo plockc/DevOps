@@ -4,7 +4,6 @@
 
 # TODO: request for hostname and for a initial password
 # TODO: options for a Arch package cache, or personal wiki/blog, or something else
-# TODO: make the 3GB primary larger, maybe swapping with swap to allow for end of disk
 
 set -e
 

@@ -4,7 +4,7 @@ set -e
 
 if [[ $# == 0 ]]; then echo && echo Please have the image path as the first argument && echo && exit; fi
 
-if ! test -f $1; then echo && echo Image file $1 does not exist && echo && exit; fi
+if ! test -f "$1"; then echo && echo Image file $1 does not exist && echo && exit; fi
 
 echo && read -p "Eject SD Card if it is inserted then hit enter to continue"
 
@@ -23,7 +23,7 @@ newDiskEscaped=${newDisk//\//\\\/} # convert / to escaped slash: \/
 echo
 diskutil list | awk "/^\/dev\/disk/ {record=0} "/$newDiskEscaped/' {record=1} {if (record) diskDetail = diskDetail $0  "\n"} END {print diskDetail}'
 echo
-read -p "Are you sure you want to destroy $newDisk with the contents of $1 ? "
+read -p "Are you sure you want to destroy $newDisk with the contents of $1 ? [yN] "
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
@@ -31,5 +31,5 @@ then
     exit;
 fi
 
-echo sudo dd bs=1m if=$1 of=$newDisk
-echo sudo diskutil unmountDisk $newDisk
+sudo dd bs=1m if="$1" of=$newDisk
+sudo diskutil unmountDisk $newDisk

@@ -31,5 +31,5 @@ then
     exit;
 fi
 
-sudo dd bs=1m if="$1" of=$newDisk
 sudo diskutil unmountDisk $newDisk
+sudo dd bs=1m if="$1" of=$newDisk

@@ -11,21 +11,20 @@ pacman --noconfirm -Sy --needed php augeas darkstat unzip dnsutils rsync screen
 
 # CHANGE PASSWORD IF STILL THE DEFAULT "ROOT"
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`
-defaultPass=`php -r "echo crypt('root', \"${salt//\$/\\\\\\$}\") . '\n';"`
-if grep -q $defaultPass /etc/shadow;
-  read -s -p "Please enter a new root password: "
-  NEW_PASSWORD=$REPLY
-  echo
-  read -s -p "Please confirm: "
-  echo
+defaultPass=`php -r "echo crypt('root', \"${salt//\$/\\\\\\$}\");"`
+if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
+read -s -p "Please enter a new root password: "
+NEW_PASSWORD=$REPLY
+echo
+read -s -p "Please confirm: "
+echo
 
-  if [[ ! $REPLY == $NEW_PASSWORD ]]
-  then
-      echo Passwords did not match, please try again
-      exit;
-  fi
-  chpasswd << EOSF
-  root:$NEW_PASSWORD
+if [[ ! $REPLY == $NEW_PASSWORD ]]; then
+  echo Passwords did not match, please try again
+  exit
+fi
+chpasswd << EOSF
+root:$NEW_PASSWORD
 EOSF
 fi
 

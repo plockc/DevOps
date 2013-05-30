@@ -61,7 +61,7 @@ grep -q "conf.d/dokuwiki.conf" /etc/lighttpd/lighttpd.conf \
    || (echo "include \"conf.d/dokuwiki.conf\"" >> /etc/lighttpd/lighttpd.conf)
 
 # create the dokuwiki configuration for lighttpd
-cat > /etc/lighttpd/conf.d/dokuwiki.conf << EOF
+test -f /etc/lighttpd/conf.d/dokuwiki.conf || cat > /etc/lighttpd/conf.d/dokuwiki.conf << EOF
 server.modules += ( "mod_access", "mod_alias" )
 alias.url += ("/wiki" => "/usr/share/webapps/dokuwiki/")
 static-file.exclude-extensions = ( ".php" )
@@ -69,8 +69,9 @@ static-file.exclude-extensions = ( ".php" )
 \$HTTP["url"] =~ "^/dokuwiki/(bin|data|inc|conf)/+.*"  { url.access-deny = ( "" ) }
 EOF
 
-# create the dokuwiki local configuration
-cp  /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak
+# create the dokuwiki local configuration, and backup current settings if any
+test -f /usr/share/webapps/dokuwiki/conf/local.php \
+  && cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak
 cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 <?php
 \$conf['title'] = 'Plock\'s Pointers';
@@ -91,12 +92,13 @@ read -p "Dokuwiki Username: "
 dokuUser=$REPLY
 read -s -p "Dokuwiki Password: "
 dokuPass=$REPLY
+echo
 read -s -p "Please confirm: "
 echo
 
-if [[ ! $REPLY == $dokuUser ]]
+if [[ ! $REPLY == $dokuPass ]]
 then
-  echo Passwords did not match, please try again
+  echo && echo Passwords did not match, please try again
   exit;
 fi
 
@@ -105,7 +107,6 @@ dokuName=$REPLY
 read -p "Dokuwiki email address: "
 dokuEmail=$REPLY
 
-openssl passwd -1 -stdin <<< $dokuPass
 echo "${dokuUser}:`openssl passwd -1 -stdin <<< $dokuPass`:$dokuName:$dokuEmail:admin,user" >> /usr/share/webapps/dokuwiki/conf/users.auth.php
 
 cat >> /usr/share/webapps/dokuwiki/conf/acl.auth.php <<EOF
@@ -114,13 +115,14 @@ cat >> /usr/share/webapps/dokuwiki/conf/acl.auth.php <<EOF
 EOF
 
 # download missing plugins
-mkdir -p /usr/share/webapps/dokuwiki/lib/plugins/{editx,pageredirect}
 test -d /usr/share/webapps/dokuwiki/lib/plugins/editx \
-  || curl --location http://nodeload.github.com/danny0838/dw-editx/tarball/release \
-      | tar --strip-components=1 -zxC /usr/share/webapps/dokuwiki/lib/plugins/editx
+  || (mkdir /usr/share/webapps/dokuwiki/lib/plugins/editx \
+      && curl --location http://github.com/danny0838/dw-editx/tarball/release \
+      | tar --strip-components=1 -zxC /usr/share/webapps/dokuwiki/lib/plugins/editx)
 test -d /usr/share/webapps/dokuwiki/lib/plugins/pageredirect \
-  || curl --location http://github.com/glensc/dokuwiki-plugin-pageredirect/tarball/master \
-      | tar -zxC /usr/share/webapps/dokuwiki/lib/plugins/pageredirect
+  || (mkdir /usr/share/webapps/dokuwiki/lib/plugins/pageredirect \
+      && curl --location http://github.com/glensc/dokuwiki-plugin-pageredirect/tarball/master \
+      | tar --strip-components=1 -zxC /usr/share/webapps/dokuwiki/lib/plugins/pageredirect)
 
 chown -R http:http /usr/share/webapps/dokuwiki
 

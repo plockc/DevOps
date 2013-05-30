@@ -2,9 +2,7 @@
 
 # USAGE: bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archInstall.sh)
 
-# TODO: request for hostname and for a initial password
-# TODO: options for a Arch package cache, or personal wiki/blog, or something else
-# TODO: make the 3GB primary larger, maybe swapping with swap to allow for end of disk
+# TODO: options for a Arch package cache
 
 set -e
 
@@ -21,8 +19,8 @@ pacman --noconfirm -Syy ntp && ntpd -gq && hwclock -w
 parted --script --align optimal /dev/sda \
   mklabel msdos \
   mkpart primary ext4 63s 100MB \
-  mkpart primary ext4 100MB 3GB \
-  mkpart primary linux-swap 3GB 4GB
+  mkpart primary ext4 100MB 20GB \
+  mkpart primary linux-swap 20GB 21GB
 
 partprobe /dev/sda
 

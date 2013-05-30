@@ -26,7 +26,7 @@ if grep -q $defaultPass /etc/shadow;
   fi
   chpasswd << EOSF
   root:$NEW_PASSWORD
-  EOSF
+EOSF
 fi
 
 # UPDATE HOSTNAME

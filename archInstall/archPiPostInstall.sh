@@ -7,7 +7,7 @@
 
 set -e
 
-pacman --noconfirm -Sy --needed php-apc php-cgi php-sqlite lighttpd dokuwiki augeas darkstat unzip dnsutils rsync screen
+pacman --noconfirm -Sy --needed php augeas darkstat unzip dnsutils rsync screen
 
 # CHANGE PASSWORD IF STILL THE DEFAULT "ROOT"
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`

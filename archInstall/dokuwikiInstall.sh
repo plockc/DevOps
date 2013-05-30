@@ -40,5 +40,5 @@ if ! test -f /etc/lighttpd/conf.d/fastcgi.conf; then
 						 )
 					   )
 					)
-	EOF
+EOF
 fi

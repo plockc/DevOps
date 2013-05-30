@@ -66,7 +66,7 @@ server.modules += ( "mod_access", "mod_alias" )
 alias.url += ("/wiki" => "/usr/share/webapps/dokuwiki/")
 static-file.exclude-extensions = ( ".php" )
 \$HTTP["url"] =~ "/(\.|_)ht" { url.access-deny = ( "" ) }
-\$HTTP["url"] =~ "^/dokuwiki/(bin|data|inc|conf)/+.*"  { url.access-deny = ( "" ) }
+\$HTTP["url"] =~ "^/wiki/(bin|data|inc|conf)/+.*"  { url.access-deny = ( "" ) }
 EOF
 
 # create the dokuwiki local configuration, and backup current settings if any
@@ -85,7 +85,7 @@ cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 \$conf['disableactions'] = 'recent,revisions,register';
 \$conf['htmlok'] = 1;
 \$conf['userewrite'] = '2';
-$conf['plugin']['editx']['redirecttext'] = '~~REDIRECT>:@ID@~~   redirected to [[@ID@]]';
+\$conf['plugin']['editx']['redirecttext'] = '~~REDIRECT>:@ID@~~   redirected to [[@ID@]]';
 EOF
 
 read -p "Dokuwiki Username: "
@@ -127,3 +127,5 @@ test -d /usr/share/webapps/dokuwiki/lib/plugins/pageredirect \
 chown -R http:http /usr/share/webapps/dokuwiki
 
 chmod 744 /var/lib/dokuwiki
+
+systemctl start lighttpd

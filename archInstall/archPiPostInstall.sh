@@ -50,7 +50,7 @@ systemctl enable darkstat
 resize2fs /dev/mmcblk0p2
 
 echo
-echo Rebooting, please wait about 25 seconds before shelling back into $HOSTNAME
+echo Rebooting, please wait about 25 seconds before \"ssh "root@$HOSTNAME"\"
 
 reboot #25 seconds to reboot
 

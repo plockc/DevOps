@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# USAGE: bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/dokuwikiInstall.sh)
+#
+
 # abort if there is an error
 set -e
 
@@ -16,8 +20,8 @@ sed -ibak 's/;extension=apc.so/extension=apc.so/' /etc/php/conf.d/apc.ini # enab
 mkdir -p /etc/lighttpd/conf.d
 
 # include fastcgi.conf
-grep "conf.d/fastcgi.conf" /etc/lighttpd/lighttpd.conf \
-   || echo "include \"conf.d/fastcgi.conf\"" >> /etc/lighttpd/lighttpd.conf
+grep -q "conf.d/fastcgi.conf" /etc/lighttpd/lighttpd.conf \
+   || (echo "include \"conf.d/fastcgi.conf\"" >> /etc/lighttpd/lighttpd.conf)
 
 if ! test -f /etc/lighttpd/conf.d/fastcgi.conf; then
 	cat > /etc/lighttpd/conf.d/fastcgi.conf << EOF

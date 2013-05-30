@@ -44,7 +44,7 @@ fi
 ln --force -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 
 # SETUP SERVICES
-systemctl enable darkstat lighttpd.service
+systemctl enable darkstat
 
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE
 resize2fs /dev/mmcblk0p2

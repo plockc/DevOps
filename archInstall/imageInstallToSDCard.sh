@@ -10,7 +10,9 @@ echo && read -p "Eject SD Card if it is inserted then hit enter to continue"
 
 disksBefore=`diskutil list | awk '/^\/dev\/disk/ {print $0}'`
 
-read -p "(Re)Insert SD Card then hit enter to continue"
+read -p "(Re)Insert SD Card, then hit enter to continue"
+
+sleep 4 # allow the disk to be recognized
 
 disksAfter=`diskutil list | awk '/^\/dev\/disk/ {print $0}'`
 
@@ -21,7 +23,7 @@ if [[ $newDisk == "" ]]; then echo && echo No new disk found! && echo && exit; e
 newDiskEscaped=${newDisk//\//\\\/} # convert / to escaped slash: \/
 
 echo
-diskutil list
+diskutil list \
   | awk "/^\/dev\/disk/ {record=0} \
      "/$newDiskEscaped/' {record=1} \
      {if (record) diskDetail = diskDetail $0  "\n"} \
@@ -35,9 +37,63 @@ then
     exit;
 fi
 
-newDisk=${newDisk/disk/rdisk} # use the raw disk to avoid the buffering, much faster
+rawDisk=${newDisk/disk/rdisk} # use the raw disk to avoid the buffering, much faster
 
 sudo diskutil unmountDisk $newDisk
 
 echo && echo Copying Image, this will take about a minute per GB on a class 10 card
-sudo dd bs=16m if="$1" of=$newDisk
+sudo dd bs=16m if="$1" of=$rawDisk
+
+#######################
+## NOW RESIZE PARTITION
+#######################
+
+sleep 5 # some reason doing it right away fails
+
+sudo diskutil unmountDisk $newDisk
+
+totalDiskBlocks=`diskutil info $newDisk | grep "Total Size" | sed 's/.*exactly \([0-9]*\) 512-Byte-Blocks)/\1/'`
+
+startBlock=`(sudo fdisk -e $newDisk 2>/dev/null <<EOF
+print
+quit
+EOF
+) | grep "^ 2" | awk '{print $11}'`
+
+let newSize=$totalDiskBlocks-$startBlock
+
+let newSizeReadable=$totalDiskBlocks*512/1024/1024
+
+sudo fdisk $newDisk
+
+echo && read -p "Are you sure you want to resize partition 2 to id 83 starting at $startBlock, size of about ${newSizeReadable}MB [yN] ?"
+
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    echo Aborting
+    exit;
+fi
+
+sudo fdisk -e $newDisk 2>/dev/null <<EOF
+edit 2
+
+
+$startBlock
+$newSize
+write
+quit
+EOF
+
+echo && echo "Updated partition table, results:" && echo
+
+sudo fdisk $newDisk
+
+echo && echo Ejecting
+
+sudo diskutil eject $newDisk
+
+echo && echo Boot your Pi on the same network, then run \"arp -a \| grep alarmpi\" to get IP address
+echo "Then you can ssh root@<ip address> with password root"
+echo
+
+

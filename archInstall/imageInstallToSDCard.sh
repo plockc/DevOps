@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# USAGE: imageInstallToSDCard.sh <path to .img>
+
 set -e
 
 if [[ $# == 0 ]]; then echo && echo Please have the image path as the first argument && echo && exit; fi
@@ -29,7 +31,7 @@ diskutil list \
      {if (record) diskDetail = diskDetail $0  "\n"} \
      END {print diskDetail}'
 echo
-read -p "Are you sure you want to destroy $newDisk with the contents of $1 ? [yN] "
+read -p "Are you sure you want to destroy $newDisk with the contents of $1 [yN]?"
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
@@ -66,7 +68,7 @@ let newSizeReadable=$totalDiskBlocks*512/1024/1024
 
 sudo fdisk $newDisk
 
-echo && read -p "Are you sure you want to resize partition 2 to id 83 starting at $startBlock, size of about ${newSizeReadable}MB [yN] ?"
+echo && read -p "Are you sure you want to resize partition 2 to id 83 starting at $startBlock, size of about ${newSizeReadable}MB [yN]? "
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
@@ -74,6 +76,7 @@ then
     exit;
 fi
 
+# update the partition table with the same start and new size for partition 2
 sudo fdisk -e $newDisk 2>/dev/null <<EOF
 edit 2
 
@@ -90,10 +93,13 @@ sudo fdisk $newDisk
 
 echo && echo Ejecting
 
+sleep 4
 sudo diskutil eject $newDisk
 
-echo && echo Boot your Pi on the same network, then run \"arp -a \| grep alarmpi\" to get IP address
-echo "Then you can ssh root@<ip address> with password root"
 echo
-
-
+echo 1) Remove the SD Card
+echo 2) Boot your Pi on the same network
+echo 3) wait about 25 seconds
+echo 4) \"arp -a \| grep alarmpi\" to get IP address
+echo 5) "ssh root@<ip address>" with the default password 'root'
+echo

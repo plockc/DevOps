@@ -49,5 +49,8 @@ systemctl enable darkstat
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE
 resize2fs /dev/mmcblk0p2
 
+echo
+echo Rebooting, please wait about 25 seconds before shelling back into $HOSTNAME
+
 reboot #25 seconds to reboot
 

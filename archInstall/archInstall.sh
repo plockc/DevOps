@@ -37,7 +37,7 @@ mount -t ext4 /dev/sda1 /mnt/boot
 mkswap /dev/sda3
 swapon /dev/sda3
 
-pacstrap /mnt base base-devel openssh php-apc php-cgi php-sqlite lighttpd dokuwiki augeas ntp wget darkhttpd darkstat unzip dnsutils rsync
+pacstrap /mnt base base-devel openssh php-apc php-cgi php-sqlite lighttpd dokuwiki augeas ntp wget darkhttpd darkstat unzip dnsutils rsync screen
 
 genfstab -p /mnt >> /mnt/etc/fstab
 

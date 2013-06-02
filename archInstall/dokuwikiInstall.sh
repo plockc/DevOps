@@ -69,13 +69,17 @@ static-file.exclude-extensions = ( ".php" )
 \$HTTP["url"] =~ "^/wiki/(bin|data|inc|conf)/+.*"  { url.access-deny = ( "" ) }
 EOF
 
-# create the dokuwiki local configuration, and backup current settings if any
-test -f /usr/share/webapps/dokuwiki/conf/local.php \
-  && cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak
+# create the dokuwiki local configuration if there is none
+if test -f /usr/share/webapps/dokuwiki/conf/local.php; then
+read -p "Enter a name for your Wiki: "
+wikiTitle=$REPLY
+read -p "Enter a tagline for your Wiki: "
+wikiTagline=$REPLY
+cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak
 cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 <?php
-\$conf['title'] = 'Plock\'s Pointers';
-\$conf['tagline'] = 'My How-To\'s, Code, and Scripts';
+\$conf['title'] = "$wikiTitle";
+\$conf['tagline'] = "$wikiTagLine;
 \$conf['license'] = 'cc-by';
 \$conf['breadcrumbs'] = 0;
 \$conf['youarehere'] = 1;
@@ -85,8 +89,9 @@ cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 \$conf['disableactions'] = 'recent,revisions,register';
 \$conf['htmlok'] = 1;
 \$conf['userewrite'] = '2';
-\$conf['plugin']['editx']['redirecttext'] = '~~REDIRECT>:@ID@~~   redirected to [[@ID@]]';
+\$conf['plugin']['editx']['redirecttext'] = '~~REDIRECT>:@ID@~~ redirected to [[@ID@]]';
 EOF
+
 
 read -p "Dokuwiki Username: "
 dokuUser=$REPLY

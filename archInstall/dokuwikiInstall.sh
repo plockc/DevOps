@@ -3,6 +3,7 @@
 #
 # USAGE: bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/dokuwikiInstall.sh)
 #
+# Will create a personal wiki (public to read but private to write)
 
 # abort if there is an error
 set -e
@@ -34,15 +35,12 @@ if ! test -f /etc/lighttpd/conf.d/fastcgi.conf; then
 	server.modules += ( "mod_fastcgi" )
 	index-file.names += ( "index.php" )
 	fastcgi.server = ( ".php" =>
-					   ( "localhost" =>
-						 (
-						   "socket" => "/run/lighttpd/php-fastcgi.sock",
-						   "bin-path" => "/usr/bin/php-cgi",
-						   "max-procs" => 1,
-	"bin-environment" => (
-	"PHP_FCGI_CHILDREN" => "1"
-	),
-						   "broken-scriptfilename" => "enable"
+		 ( "localhost" =>
+		 ("socket" => "/run/lighttpd/php-fastcgi.sock",
+				"bin-path" => "/usr/bin/php-cgi",
+				"max-procs" => 1,
+	            "bin-environment" => ("PHP_FCGI_CHILDREN" => "1"),
+				"broken-scriptfilename" => "enable"
 						 )
 					   )
 					)

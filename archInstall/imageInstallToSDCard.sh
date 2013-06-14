@@ -70,8 +70,7 @@ sudo fdisk $newDisk
 
 echo && read -p "Are you sure you want to resize partition 2 to id 83 starting at $startBlock, size of about ${newSizeReadable}MB [yN]? "
 
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo Aborting
     exit;
 fi

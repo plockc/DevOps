@@ -71,7 +71,7 @@ EOF
 if [[ ! -f /usr/share/webapps/dokuwiki/conf/local.php ]]; then
 	read -p "Enter a name for your Wiki: " wikiTitle
 	read -p "Enter a tagline for your Wiki: " wikiTagline
-	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak
+	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak || true
 	cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 <?php
 \$conf['title'] = "$wikiTitle";

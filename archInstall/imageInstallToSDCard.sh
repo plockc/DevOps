@@ -36,7 +36,7 @@ read -p "Are you sure you want to destroy $newDisk with the contents of $1 [yN]?
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
     echo Aborting
-    exit;
+    exit 1;
 fi
 
 rawDisk=${newDisk/disk/rdisk} # use the raw disk to avoid the buffering, much faster
@@ -96,9 +96,9 @@ sleep 4
 sudo diskutil eject $newDisk
 
 echo
-echo 1) Remove the SD Card
-echo 2) Boot your Pi on the same network
-echo 3) wait about 25 seconds
-echo 4) \"arp -a \| grep alarmpi\" to get IP address
-echo 5) "ssh root@<ip address>" with the default password 'root'
+echo 1\) Remove the SD Card and install to the Raspberry Pi
+echo 2\) Connect your Pi to the network and boot it
+echo 3\) wait about 25 seconds
+echo 4\) \"arp -a \| grep alarmpi\" to get IP address
+echo 5\) "ssh root@<ip address>" with the default password 'root'
 echo

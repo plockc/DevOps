@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>${reverseHost}.backup.${remoteUser}.${label}</string>
+	<key>LowPriorityIO</key><true/>
+	<key>EnvironmentVariables</key>
+	  <dict>
+	    <key>EXCLUDES</key><string>*/data/cache*,*/data/locks*,*/data/tmp*,*.nfs*,*.class</string>
+	    <key>remoteUser</key><string>${remoteUser}</string>
+	  </dict>
+    <key>ProgramArguments</key>
+    <array>
+		<string>/var/root/bin/backupRemoteHost.sh</string>
+		<string>${remoteHost}:/usr/share/webapps/dokuwiki</string>
+		<string>${remoteHost}:/etc/webapps/dokuwiki</string>
+		<string>${remoteHost}:/var/lib/dokuwiki</string>
+		<string>${backupDestinationDir}</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>3600</integer>
+</dict>
+</plist>

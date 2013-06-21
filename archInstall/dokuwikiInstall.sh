@@ -68,7 +68,7 @@ static-file.exclude-extensions = ( ".php" )
 EOF
 
 # create the dokuwiki local configuration if there is none
-if test -f /usr/share/webapps/dokuwiki/conf/local.php; then
+if [[ ! test -f /usr/share/webapps/dokuwiki/conf/local.php ]]; then
 	read -p "Enter a name for your Wiki: " wikiTitle
 	read -p "Enter a tagline for your Wiki: " wikiTagline
 	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak

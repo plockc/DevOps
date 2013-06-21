@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#
-# USAGE: bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/dokuwikiInstall.sh)
+# USAGE: (run on the pi)
+# bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/dokuwikiInstall.sh)
 #
 # Will create a personal wiki (public to read but private to write)
 
@@ -72,21 +72,21 @@ if test -f /usr/share/webapps/dokuwiki/conf/local.php; then
 	read -p "Enter a name for your Wiki: " wikiTitle
 	read -p "Enter a tagline for your Wiki: " wikiTagline
 	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak
-	cat > /usr/share/webapps/dokuwiki/conf/local.php <<- EOF
-	<?php
-	\$conf['title'] = "$wikiTitle";
-	\$conf['tagline'] = "$wikiTagLine;
-	\$conf['license'] = 'cc-by';
-	\$conf['breadcrumbs'] = 0;
-	\$conf['youarehere'] = 1;
-	\$conf['useheading'] = '1';
-	\$conf['useacl'] = 1;
-	\$conf['superuser'] = '@admin';
-	\$conf['disableactions'] = 'recent,revisions,register';
-	\$conf['htmlok'] = 1;
-	\$conf['userewrite'] = '2';
-	\$conf['plugin']['editx']['redirecttext'] = '~~REDIRECT>:@ID@~~ redirected to [[@ID@]]';
-	EOF
+	cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
+<?php
+\$conf['title'] = "$wikiTitle";
+\$conf['tagline'] = "$wikiTagLine;
+\$conf['license'] = 'cc-by';
+\$conf['breadcrumbs'] = 0;
+\$conf['youarehere'] = 1;
+\$conf['useheading'] = '1';
+\$conf['useacl'] = 1;
+\$conf['superuser'] = '@admin';
+\$conf['disableactions'] = 'recent,revisions,register';
+\$conf['htmlok'] = 1;
+\$conf['userewrite'] = '2';
+\$conf['plugin']['editx']['redirecttext'] = '~~REDIRECT>:@ID@~~ redirected to [[@ID@]]';
+EOF
 fi
 
 read -p "Dokuwiki Username: " dokuUser

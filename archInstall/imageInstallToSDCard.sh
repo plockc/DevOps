@@ -4,6 +4,11 @@
 
 set -e
 
+if (( `id -u` != 0 )); then
+  echo Please run with sudo
+  exit 1
+fi
+
 if [[ $# == 0 ]]; then echo && echo Please have the image path as the first argument && echo && exit; fi
 
 if ! test -f "$1"; then echo && echo Image file $1 does not exist && echo && exit; fi
@@ -92,7 +97,7 @@ sudo diskutil eject $newDisk
 echo
 echo 1\) Remove the SD Card and install to the Raspberry Pi
 echo 2\) Connect your Pi to the network and boot it
-echo 3\) wait about 25 seconds
+echo 3\) wait about 25 seconds for the host to appear in local dns
 echo 4\) \"arp -a \| grep alarmpi\" to get IP address
 echo 5\) "ssh root@<ip address>" with the default password 'root'
 echo

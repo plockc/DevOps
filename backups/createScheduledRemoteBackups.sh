@@ -19,10 +19,7 @@ function usage {
 	echo ./setupBakup \<label\> \<backupTemplateFile\> \[user\@\]remoteHost 
 }
 
-if (( $# == 0 )); then
-	usage;
-	exit 1;
-fi
+if (( $# == 0 )); then usage; exit 1; fi
 
 label=$1 # if label is empty, then set to 'default'
 
@@ -72,10 +69,12 @@ set -e
 # to try without password (key only)
 # -oPasswordAuthentication=no 
 
+(( `id -u` == 0 )) && sshDir='/var/root/.ssh' || sshDir=~/.ssh
+
 if [[ $sshConnection == "connected" ]]; then
 	echo && echo Connection verified
 elif [[ $sshConnection =~ "Permission denied" ]]; then
-    echo Failed connection to ${remoteHost} because: ${sshConnection}
+    echo Failed connection to ${remoteUser}${remoteHost} because: ${sshConnection}
     if ! which -s ssh-copy-id; then
 		# suggest installing homebrew
 		if ! which -s brew; then
@@ -88,20 +87,21 @@ elif [[ $sshConnection =~ "Permission denied" ]]; then
 		fi
 	fi
 	# set up ssh keys for root account
-	if ! sudo test -e /var/root/.ssh/id_dsa; then
+	if [[ ! -e ${sshDir}/id_dsa ]]; then
 	  echo Creating dsa key for ssh
-	  ssh-keygen -q -N '' -t dsa -f /var/root/.ssh/id_dsa;
+	  mkdir -p ${sshDir}
+	  ssh-keygen -q -N '' -t dsa -f ${sshDir}/id_dsa;
 	fi
 	# copy key to the destination server
 	echo copying key to $remoteHost
-	ssh-copy-id -i /var/root/.ssh/id_dsa.pub ${remoteUser}@${remoteHost}
+	ssh-copy-id -i ${sshDir}/id_dsa.pub ${remoteUser}@${remoteHost}
 else
     echo && echo Failed connection to ${remoteUser}@${remoteHost} because: ${sshConnection}
     exit 1;
 fi
 
 # CREATE RSNAPSHOT CONFIGURATION
-(( `id -u` == 0 )) && rsnapshotConfigBase='/var/root/.rsnapshot' || rsnapshotConfigBase=~/Documents/Backups
+(( `id -u` == 0 )) && rsnapshotConfigBase='/var/root/.rsnapshot' || rsnapshotConfigBase=~/.rsnapshot
 rsnapshotConfigParentDir="${rsnapshotConfigBase}/${remoteHost}"
 rsnapshotConfig="${rsnapshotConfigParentDir}/${remoteUser}-${label}.config"
 
@@ -120,12 +120,15 @@ OUTER
 	echo && echo Created rsnapshot configuration at ${rsnapshotConfig}
 fi
 
+(( `id -u` == 0 )) && launchctlDir='/Library/LaunchDaemons' || launchctlDir=~/Library/LaunchAgents
+
 function createPlist {
 local interval=$1
 local schedule=$2
-plistFile="/Library/LaunchDaemons/${reverseHost}.backup.${remoteUser}.${label}.${interval}.plist"
+plistFile="${launchctlDir}/${reverseHost}.backup.${remoteUser}.${label}.${interval}.plist"
 # if it is already there unload it first so we can load the new one
 if [[ -e ${plistFile} ]]; then
+	echo unloading old ${plistFile}
 	launchctl unload ${plistFile}
 fi
 # this treat the path passed into the script as a template with bash variable expansion

@@ -5,33 +5,61 @@
 # can set BACKUP_ROOT_DIR for the root of the backups
 #    backups will be full paths under BACKUP_ROOT_DIR/
 
-# can debug with
+# can debug the launchdaemon with
 # sudo launchctl log level debug
 # tail -f /var/log/system.log
 # and you might need <key>StandardOutPath</key><string>/var/log/progname.log</string>
 #                    <key>StandardErrorPath</key><string>/var/log/progname_err.log</string>
 
+# some good plist info: http://www.mactech.com/articles/mactech/Vol.25/25.09/2509MacEnterprise-launchdforLunch/index.html
+
 set -e
 
-if (( `id -u` != 0 )); then
-	echo Must run this script as root
-	exit 1
-fi
+function usage {
+	echo ./setupBakup \<label\> \<backupTemplateFile\> \[user\@\]remoteHost 
+}
 
-if (( $# != 1 )) || [[ ! -f $1 ]]; then
-	echo Must pass in a plist template file path as first and only argument
+if (( $# == 0 )); then
+	usage;
 	exit 1;
 fi
 
-# determine remote host and the reverse (to name the plist)
-read -p "hostname for the remote server: " remoteHost
+label=$1 # if label is empty, then set to 'default'
+
+# GET THE REMOTE HOST
+remoteHost=${3#*@} # sucks away all the leading characters until @
+
+# CHECK FOR REMOTE HOST EXISTANCE
+if [[ ! `host ${remoteHost}` =~ "has address" ]]; then
+	echo Cannot resolve host ${remoteHost}
+	exit 1
+fi
+
+# GET REVERSE HOST FROM REMOTE HOST
 for part in ${remoteHost//./ }; do reverseHost=${part}.${reverseHost}; done;
-reverseHost=${reverseHost%?} # the % removes the match of '?' from the end
+reverseHost=${reverseHost%?} # the % removes the '.' ('?' matches single character) from the end
 
-read -p "Username for the remote server: [$USER] "
-remoteUser=${REPLY:=$USER} # if REPLY is empty, then set to current user
+# GET REMOTE USER
+remoteUser=${3/${remoteHost}/} # sucks away all the trailing characters after and including '@'
+remoteUser=${remoteUser%?} # removes trailing @
+remoteUser=${remoteUser:=$USER}
 
-echo Verifying connection to ${remoteUser}@${remoteHost}
+# GET ROOT FOR BACKUPS
+(( `id -u` == 0 )) && defaultBackupRootDir='/var/root/rsnapshots' || defaultBackupRootDir=~/Documents/Backups
+backupRootDir=${BACKUP_ROOT_DIR:=${defaultBackupRootDir}}
+
+# GET BACKUP DIR FOR THIS BACKUP
+backupDestinationDir=${backupRootDir}/${remoteHost}/${remoteUser}-${label}
+if [[ -e "${backupDestinationDir}" && ! $(find ${backupDestinationDir} -maxdepth 0 -empty) ]]; then
+	echo && echo You must chose a non-existant or empty directory
+	exit 1
+elif [[ ! -e "${backupDestinationDir}" ]]; then
+	echo && echo Creating dir ${backupDestinationDir}
+	mkdir -p ${backupDestinationDir} || echo why weird exit status for mkdir -p
+fi
+chmod 700 ${backupDestinationDir} || echo weird chmod exit status
+
+echo && echo Verifying connection to ${remoteUser}@${remoteHost}
 set +e
 sshConnection=$(ssh -l $remoteUser -oBatchMode=yes -oConnectTimeout=2 ${remoteHost} echo connected 2>&1 \
   | tr -d '\r\n' | sed 's/.*been changed.*/Host key changed/')
@@ -45,7 +73,7 @@ set -e
 # -oPasswordAuthentication=no 
 
 if [[ $sshConnection == "connected" ]]; then
-	echo Connection verified
+	echo && echo Connection verified
 elif [[ $sshConnection =~ "Permission denied" ]]; then
     echo Failed connection to ${remoteHost} because: ${sshConnection}
     if ! which -s ssh-copy-id; then
@@ -72,73 +100,69 @@ else
     exit 1;
 fi
 
+# CREATE RSNAPSHOT CONFIGURATION
+(( `id -u` == 0 )) && rsnapshotConfigBase='/var/root/.rsnapshot' || rsnapshotConfigBase=~/Documents/Backups
+rsnapshotConfigParentDir="${rsnapshotConfigBase}/${remoteHost}"
+rsnapshotConfig="${rsnapshotConfigParentDir}/${remoteUser}-${label}.config"
+
+echo && echo rsnapshot configuration is at ${rsnapshotConfig}
+
 # create backup script and stick it into the root's bin directory if not already there
-if [[ ! -f /var/root/bin/backupRemoteHost.sh ]]; then
-	mkdir -p /var/root/bin
-	cat > /var/root/bin/backupRemoteHost.sh <<-EOF
-	#!/bin/bash
-
-	# last argument is the local destination, the rest of the arguments are sources
-	# expects remoteUser as environment variable
-
-	remoteUser=\${remoteUser:=\$USER} # defaults the remoteUser to current user
-
-	for src in "\${@:1:\$((\$#-1))}"; do  # iterate on arguments ranging from first to next to last
-	  echo rsync --relative --archive --quiet --rsh="ssh -l \${remoteUser}" "\${src}" "\${!#}";
-	done
-	
-	# Notes
-	# \$(( expr )) does integer math, # is variable for num arguments, the @:x:y is array slicing
-	# iterate over the slice of all arguments ( @ ) from the first to the next to last (all the source dirs)
-	# ! is a level of indirection (evals the value, which was the number of arguments, then uses that as a var name)
-	# so \${!#} becomes the value of the last argument
-	EOF
-	chmod 755 /var/root/bin/backupRemoteHost.sh
-fi
-
-echo && read -p "Provide the local parent directory backup for the backup (no spaces): [$HOME/Documents/Backups/$remoteHost/$label]: "
-backupDestinationDir=${BACKUP_ROOT_DIR:="$HOME/Documents/Backups/$remoteHost/$label"}
-
-if [[ -e "${backupDestinationDir}" && ! find ${backupDestinationDir} -maxdepth 0 -empty ]]; then
-	echo && echo You must chose a non-existant or empty directory
-elif [[ ! find ${backupDestinationDir} -maxdepth 0 -empty ]]; then
-	echo && echo Creating dir ${backupDestinationDir}
-	mkdir -p ${backupDestinationDir}
-fi
-chown 
-
-echo && read -p "Provide a label/name for the backup (no spaces): [default]: "
-label=${REPLY:="default"} # if label is empty, then set to 'default'
-
-plistFile="/Library/LaunchDaemons/${reverseHost}.backup.${remoteUser}.${label}.plist"
-
-if [[ ! -e "$plistFile" ]] || [[ -e "$plistFile" ]] \
-  && read -p "LaunchDaemon already exists, do you want to overwrite? [Ny] " \
-  && [[ $REPLY =~ ^[Yy]$ ]]; then
-	# this treat the path passed into the script as a template with bash variable expansion
-	# we have to update the runtime environment of bash as the locals are not copied
-	reverseHost=$reverseHost label=$label remoteUser=$remoteUser remoteHost=$remoteHost \
-	# note frist tab is ignored with <<- allowing us to pretty print
+if [[ ! -f "${rsnapshotConfig}" ]]; then
+	mkdir -p "${rsnapshotConfigParentDir}"
 	cat <(remoteHost=$remoteHost remoteUser=$remoteUser reverseHost=$reverseHost \
 		  label=$label backupDestinationDir=$backupDestinationDir bash <<OUTER
 cat <<INNER
-`cat $1`
+`cat $2`
 INNER
 OUTER
-) > ${plistFile}
-	chmod 644 ${plistFile}
+) > "${rsnapshotConfig}"
+	echo && echo Created rsnapshot configuration at ${rsnapshotConfig}
 fi
 
-echo '*************************************************************************'
-cat ${plistFile}
-echo '*************************************************************************'
-
-# tweak settings in the plist
-if read -p "Tweak the rsync settings? [yN] " && [[ $REPLY =~ ^[yY]$ ]]; then
-	vi /Library/LaunchDaemons/${reverseHost}.${label}.backup.plist
+function createPlist {
+local interval=$1
+local schedule=$2
+plistFile="/Library/LaunchDaemons/${reverseHost}.backup.${remoteUser}.${label}.${interval}.plist"
+# if it is already there unload it first so we can load the new one
+if [[ -e ${plistFile} ]]; then
+	launchctl unload ${plistFile}
 fi
+# this treat the path passed into the script as a template with bash variable expansion
+# we have to update the runtime environment of bash as the locals are not copied
+# note frist tab is ignored with <<- allowing us to pretty print
+cat >${plistFile} <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>${reverseHost}.backup.${remoteUser}.${label}.${interval}</string>
+	<key>LowPriorityIO</key><true/>
+    <key>ProgramArguments</key>
+    <array>
+		<string>`which rsnapshot`</string>
+		<string>-c</string>
+		<string>${rsnapshotConfig}</string>
+		<string>${interval}</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <array>
+		<dict>
+		  ${schedule}
+		</dict>
+    </array>
+</dict>
+</plist>
+EOF
+chmod 644 ${plistFile}
+launchctl load ${plistFile}
+echo && echo created and launched ${plistFile}
+}
 
-if echo && read -p "Enable the backups? [yN] " && [[ $REPLY =~ ^[Yy]$ ]]; then
-	# enabling the backup
-	launchctl load ${plistFile}
-fi
+function keyVal { echo "<key>${1}</key><integer>${2}</integer>"; }
+
+createPlist hourly "$(keyVal Minute 0)"
+createPlist daily  "$(keyVal Hour 1)$(keyVal Minute 10)"
+createPlist weekly "$(keyVal Weekday 0)$(keyVal Hour 2)$(keyVal Minute 25)"
+createPlist monthly "$(keyVal Day 1)$(keyVal Hour 3)$(keyVal Minute 40)"

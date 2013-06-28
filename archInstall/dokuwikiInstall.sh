@@ -71,11 +71,11 @@ EOF
 if [[ ! -f /usr/share/webapps/dokuwiki/conf/local.php ]]; then
 	read -p "Enter a name for your Wiki: " wikiTitle
 	read -p "Enter a tagline for your Wiki: " wikiTagline
-	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak || true
+	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak 2>/dev/null || true
 	cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 <?php
-\$conf['title'] = "$wikiTitle";
-\$conf['tagline'] = "$wikiTagLine;
+\$conf['title'] = \"${wikiTitle}\";
+\$conf['tagline'] = \"${wikiTagLine}\";
 \$conf['license'] = 'cc-by';
 \$conf['breadcrumbs'] = 0;
 \$conf['youarehere'] = 1;
@@ -103,7 +103,7 @@ fi
 read -p "Dokuwiki User Full Name: " dokuName
 read -p "Dokuwiki email address: " dokuEmail
 
-echo "${dokuUser}:`openssl passwd -1 -stdin <<< $dokuPass`:$dokuName:$dokuEmail:admin,user" >> /usr/share/webapps/dokuwiki/conf/users.auth.php
+echo "${dokuUser}:`openssl passwd -1 -stdin <<< "${dokuPass}"`:$dokuName:$dokuEmail:admin,user" >> /usr/share/webapps/dokuwiki/conf/users.auth.php
 
 cat >> /usr/share/webapps/dokuwiki/conf/acl.auth.php <<EOF
 *               @ALL          1
@@ -125,3 +125,5 @@ chown -R http:http /usr/share/webapps/dokuwiki
 chmod 744 /var/lib/dokuwiki
 
 systemctl start lighttpd
+
+echo you can go to /wiki to view your wiki

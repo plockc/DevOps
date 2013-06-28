@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# USAGE: bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh)
+# USAGE: (run on the pi)
+# bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh)
 
 # TODO: request for hostname and for a initial password
 # TODO: options for a Arch package cache, or personal wiki/blog, or something else

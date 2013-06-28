@@ -56,49 +56,6 @@ elif [[ ! -e "${backupDestinationDir}" ]]; then
 fi
 chmod 700 ${backupDestinationDir} || echo weird chmod exit status
 
-echo && echo Verifying connection to ${remoteUser}@${remoteHost}
-set +e
-sshConnection=$(ssh -l $remoteUser -oBatchMode=yes -oConnectTimeout=2 ${remoteHost} echo connected 2>&1 \
-  | tr -d '\r\n' | sed 's/.*been changed.*/Host key changed/')
-# Operation timed out, Host key verification failed, Host key changed, Connection refused, Could not resolve hostname, Permission denied
-set -e
-
-# test for hostname move or ip move outputs
-# should test first for host key changed, then remove entries
-# 
-# to try without password (key only)
-# -oPasswordAuthentication=no 
-
-(( `id -u` == 0 )) && sshDir='/var/root/.ssh' || sshDir=~/.ssh
-
-if [[ $sshConnection == "connected" ]]; then
-	echo && echo Connection verified
-elif [[ $sshConnection =~ "Permission denied" ]]; then
-    echo Failed connection to ${remoteUser}${remoteHost} because: ${sshConnection}
-    if ! which -s ssh-copy-id; then
-		# suggest installing homebrew
-		if ! which -s brew; then
-		  echo "Install homebrew or ssh-copy-id so we can install ssh keys, to install homebrew:"
-		  echo ruby -e \"\$\(curl -fsSL https://raw.github.com/mxcl/homebrew/go\)\";
-		  exit 1;
-		else
-		  echo brew installing ssh-copy-id
-		  brew install ssh-copy-id;
-		fi
-	fi
-	# set up ssh keys for root account
-	if [[ ! -e ${sshDir}/id_dsa ]]; then
-	  echo Creating dsa key for ssh
-	  mkdir -p ${sshDir}
-	  ssh-keygen -q -N '' -t dsa -f ${sshDir}/id_dsa;
-	fi
-	# copy key to the destination server
-	echo copying key to $remoteHost
-	ssh-copy-id -i ${sshDir}/id_dsa.pub ${remoteUser}@${remoteHost}
-else
-    echo && echo Failed connection to ${remoteUser}@${remoteHost} because: ${sshConnection}
-    exit 1;
-fi
 
 # CREATE RSNAPSHOT CONFIGURATION
 (( `id -u` == 0 )) && rsnapshotConfigBase='/var/root/.rsnapshot' || rsnapshotConfigBase=~/.rsnapshot

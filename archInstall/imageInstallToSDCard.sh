@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# USAGE: imageInstallToSDCard.sh <path to .img>
+# USAGE: sudo imageInstallToSDCard.sh <path to .img>
 
 set -e
 
@@ -31,7 +31,7 @@ diskutil list \
      {if (record) diskDetail = diskDetail $0  "\n"} \
      END {print diskDetail}'
 echo
-read -p "Are you sure you want to destroy $newDisk with the contents of $1 [yN]?"
+read -p "Are you sure you want to destroy $newDisk and all of its partitions with the contents of $1 [yN]?"
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
@@ -52,7 +52,10 @@ sudo dd bs=16m if="$1" of=$rawDisk
 
 sleep 5 # some reason doing it right away fails
 
+echo Completed Image Copy, unmounting Disk to prepare for resizing partition
 sudo diskutil unmountDisk $newDisk
+
+sleep 5 # allow disk to unmount
 
 totalDiskBlocks=`diskutil info $newDisk | grep "Total Size" | sed 's/.*exactly \([0-9]*\) 512-Byte-Blocks)/\1/'`
 
@@ -65,15 +68,6 @@ EOF
 let newSize=$totalDiskBlocks-$startBlock
 
 let newSizeReadable=$totalDiskBlocks*512/1024/1024
-
-sudo fdisk $newDisk
-
-echo && read -p "Are you sure you want to resize partition 2 to id 83 starting at $startBlock, size of about ${newSizeReadable}MB [yN]? "
-
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo Aborting
-    exit;
-fi
 
 # update the partition table with the same start and new size for partition 2
 sudo fdisk -e $newDisk 2>/dev/null <<EOF

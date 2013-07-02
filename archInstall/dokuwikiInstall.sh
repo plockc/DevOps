@@ -74,8 +74,8 @@ if [[ ! -f /usr/share/webapps/dokuwiki/conf/local.php ]]; then
 	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak 2>/dev/null || true
 	cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 <?php
-\$conf['title'] = \"${wikiTitle}\";
-\$conf['tagline'] = \"${wikiTagLine}\";
+\$conf['title'] = "${wikiTitle}";
+\$conf['tagline'] = "${wikiTagline}";
 \$conf['license'] = 'cc-by';
 \$conf['breadcrumbs'] = 0;
 \$conf['youarehere'] = 1;

@@ -58,7 +58,13 @@ chmod 700 ${backupDestinationDir} || echo weird chmod exit status
 
 
 # CREATE RSNAPSHOT CONFIGURATION
-(( `id -u` == 0 )) && rsnapshotConfigBase='/var/root/.rsnapshot' || rsnapshotConfigBase=~/.rsnapshot
+if (( `id -u` == 0 )); then
+	rsnapshotConfigBase='/var/root/.rsnapshot'
+	lockfile='/var/run/rsnapshot.pid'
+else
+	rsnapshotConfigBase=~/.rsnapshot
+	lockfile='/.rsnapshot/rsnapshot.pid'
+fi
 rsnapshotConfigParentDir="${rsnapshotConfigBase}/${remoteHost}"
 rsnapshotConfig="${rsnapshotConfigParentDir}/${remoteUser}-${label}.config"
 
@@ -68,7 +74,8 @@ echo && echo rsnapshot configuration is at ${rsnapshotConfig}
 if [[ ! -f "${rsnapshotConfig}" ]]; then
 	mkdir -p "${rsnapshotConfigParentDir}"
 	cat <(remoteHost=$remoteHost remoteUser=$remoteUser reverseHost=$reverseHost \
-		  label=$label backupDestinationDir=$backupDestinationDir bash <<OUTER
+		  label=$label backupDestinationDir=$backupDestinationDir lockfile=${lockfile} \
+		  bash <<OUTER
 cat <<INNER
 `cat $2`
 INNER

@@ -74,7 +74,7 @@ elif [[ $sshConnection =~ "Permission denied" ]]; then
 	  echo && echo "Trying again"
 	  $0 $@
 	fi
-elif [[ $sshConnection =~ "Host key verification failed" ]]; then
+elif [[ $sshConnection =~ "Host key verification failed" || $sshConnection =~ "Host key changed" ]]; then
 	echo && echo "Remote Fingerprint"
 	ssh-keyscan ${remoteHost} 2>/dev/null | ssh-keygen -lv -F ${remoteHost} -f /dev/stdin
 	if grep -q ${remoteHost} ${sshDir}/known_hosts; then
@@ -89,7 +89,7 @@ elif [[ $sshConnection =~ "Host key verification failed" ]]; then
 	fi
 	echo && read -p "Add key? [Yn] "
 	if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-		ssh-keyscan alarmpi 2>/dev/null >> ${sshDir}/known_hosts
+		ssh-keyscan ${remoteHost} 2>/dev/null >> ${sshDir}/known_hosts
 		echo && echo "Trying again"
 		$0 $@
 	fi

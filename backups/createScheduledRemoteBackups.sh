@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # must be run as root
-# must pass in a plist template file path as first argument
 # can set BACKUP_ROOT_DIR for the root of the backups
 #    backups will be full paths under BACKUP_ROOT_DIR/
 
@@ -42,11 +41,11 @@ remoteUser=${remoteUser%?} # removes trailing @
 remoteUser=${remoteUser:=$USER}
 
 # GET ROOT FOR BACKUPS
-(( `id -u` == 0 )) && defaultBackupRootDir='/var/root/rsnapshots' || defaultBackupRootDir=~/Documents/Backups
+(( `id -u` == 0 )) && defaultBackupRootDir='/var/root/rsnapshots' || defaultBackupRootDir=~/Documents/RemoteBackups
 backupRootDir=${BACKUP_ROOT_DIR:=${defaultBackupRootDir}}
 
 # GET BACKUP DIR FOR THIS BACKUP
-backupDestinationDir=${backupRootDir}/${remoteHost}/${remoteUser}-${label}
+backupDestinationDir=${backupRootDir}/${remoteHost}-${remoteUser}-${label}
 if [[ -e "${backupDestinationDir}" && ! $(find ${backupDestinationDir} -maxdepth 0 -empty) ]]; then
 	echo && echo You must chose a non-existant or empty directory
 	exit 1
@@ -60,10 +59,10 @@ chmod 700 ${backupDestinationDir} || echo weird chmod exit status
 # CREATE RSNAPSHOT CONFIGURATION
 if (( `id -u` == 0 )); then
 	rsnapshotConfigBase='/var/root/.rsnapshot'
-	lockfile='/var/run/rsnapshot.pid'
+	lockfile="/var/run/rsnapshot-${remoteHost}-${remoteUser}-${label}.pid'
 else
 	rsnapshotConfigBase=~/.rsnapshot
-	lockfile='/.rsnapshot/rsnapshot.pid'
+	lockfile='/.rsnapshot/rsnapshot-${remoteHost}-${remoteUser}-${label}.pid'
 fi
 rsnapshotConfigParentDir="${rsnapshotConfigBase}/${remoteHost}"
 rsnapshotConfig="${rsnapshotConfigParentDir}/${remoteUser}-${label}.config"

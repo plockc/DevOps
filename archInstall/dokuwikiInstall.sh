@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # USAGE: (run on the pi)
-# bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/dokuwikiInstall.sh)
+# bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/dokuwikiInstall.sh)
 #
 # Will create a personal wiki (public to read but private to write)
 
@@ -52,7 +52,7 @@ fi
 ####################
 
 # configure PHP so it is authorized to access the wiki installation
-sed -i 's#\(^open_base.*\)#\1:/etc/webapps/dokuwiki:/var/lib/dokuwiki#' /etc/php/php.ini
+sed -i'.bak' -e 's#\(^open_base.*\)#\1:/etc/webapps/dokuwiki:/var/lib/dokuwiki#' /etc/php/php.ini
 
 # include dokuwiki.conf
 grep -q "conf.d/dokuwiki.conf" /etc/lighttpd/lighttpd.conf \

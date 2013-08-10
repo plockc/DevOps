@@ -1,0 +1,39 @@
+" Comments lead with a double quote
+" turn on color highlighting
+syntax enable
+" turn on line numbering
+set number
+" turn on mouse for all modes
+set mouse=a
+
+set hlsearch
+
+function! s:DiffWithSaved()
+  let filetype=&ft
+  diffthis
+  vnew | r # | normal! 1Gdd
+  diffthis
+  exe "setlocal bt=nofile bh=wipe nobl noswf ro ft=" . filetype
+endfunction
+com! DiffSaved call s:DiffWithSaved()
+
+set clipboard=unnamed
+
+" initialize all of the plugins managed by pathogen
+execute pathogen#infect()
+
+nmap <F8> :TagbarToggle<CR>
+
+" TAGBAR configuration
+" --------------------
+let g:tagbar_singleclick = 1
+autocmd VimEnter * nested :call tagbar#autoopen(1)
+autocmd FileType * nested :call tagbar#autoopen(0)
+" :autocmd BufEnter * nested :call tagbar#autoopen(0)
+
+" solarized dark background
+set background=dark
+
+" solarized color scheme
+colorscheme solarized
+

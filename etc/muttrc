@@ -1,0 +1,69 @@
+source ~/.mutt/muttrc-$USER
+source ~/.mutt/solarized/mutt-colors-solarized-dark-16.muttrc
+set use_from=yes
+set use_envelope_from=yes
+
+set query_command = "~/.mutt/mutt-ldap.pl '%s' 2>/dev/null"
+
+# how long to wait for a server connection
+set connect_timeout=60
+# polls imap connection to keep server from closing the connection
+set imap_keepalive=30
+# exchange may not support checking for new mail via IDLE very well
+set imap_idle=yes
+# new mail check in all mailboxes, assuming since spool is over imap, we want this a bit larger
+set mail_check=25
+# how long to wait for user input before aborting so we can check mail
+set timeout=30
+# do not move messages from INBOX (spool) to mbox after reading them (just leave them there please)
+set move=no
+# instead of listing the imap INBOX as a mailbox so mutt can look for new mail, this will automatically add imap folders for checking
+# did not seem to keep me logged in though
+set imap_check_subscribed=yes
+
+
+set spoolfile = "=INBOX"
+set record = "=Sent Items"
+set postponed = "=Drafts"
+# outlook is putting my trash here
+set trash = "=Deleted Items"
+# not needed as we have imap_check_subscribed turned on
+mailboxes =INBOX
+
+# make a copy of sent mail
+set copy=yes
+
+set sort=threads
+
+# keep a cache of headers for faster loading
+set header_cache=~/.mutt/hcache
+set message_cachedir=~/.mutt/bcache
+
+# inline text/html
+auto_view text/html
+
+# Display download progress every 10k
+set net_inc=10
+
+bind index G imap-fetch-mail
+bind index a group-reply
+bind pager a group-reply
+bind index e noop
+bind index h noop
+bind index m noop
+bind index n mail
+bind index p noop
+bind index w noop
+bind index y noop
+bind index b previous-page
+bind index \Cb previous-page
+bind index \Cf next-page
+bind pager \Cb previous-page
+bind pager \Cf next-page
+bind pager b previous-page
+# parse the message for urls with urlview, provide a menu selection, and launch an app, the wait_key set/unset is to avoid a confirmation from mutt
+macro pager \cu ": unset wait_key; set pipe-decode\n|urlview\n: set wait_key; unset pipe_decode\n" 'Follow links with urlview'
+bind pager <Up> previous-line
+bind pager <Down> next-line
+
+

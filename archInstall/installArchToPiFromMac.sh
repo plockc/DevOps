@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: remove alarmpi keys from known hosts and ignore unknown host on ssh
+
 # stop on any errors
 set -e
 
@@ -33,10 +35,11 @@ esac; done
 if [[ -z "${isoFile}" ]]; then echo "You much specify an iso file with -f"; exit 1; fi
 
 # isoFile gets passed to the script as first argument, script is sourced remotely
-sh <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageInstallToSDCard.sh) $isoFile
+bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageInstallToSDCard.sh) "$isoFile"
 
-echo Just eject the SD card and install to Raspberry Pi and power the Pi on, then hit enter to continue
+echo Just remove (already ejected) the SD card and install to Raspberry Pi and power the Pi on, then hit enter to continue and use \"root\" for the password when prompted
 
-ssh alarpi echo done!
+sleep 25
+ssh root@alarmpi echo done!
 
 # bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh)

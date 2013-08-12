@@ -5,30 +5,33 @@ set use_envelope_from=yes
 
 set query_command = "~/.mutt/mutt-ldap.pl '%s' 2>/dev/null"
 
-# how long to wait for a server connection
-set connect_timeout=60
-# polls imap connection to keep server from closing the connection
-set imap_keepalive=30
+# how long to wait for a server connection to time out
+set connect_timeout=90
+# maximum time to wait before polling imap connections, not sure diff between this and timeout
+set imap_keepalive=60
 # exchange may not support checking for new mail via IDLE very well
-set imap_idle=yes
-# new mail check in all mailboxes, assuming since spool is over imap, we want this a bit larger
+set imap_idle
+# if this much time passes without keyboard input, then go ahead and scan the folders for new mail/updates
+set timeout=40
+# the minimum time before we would scan folders for new mail/updates, keeps imap chattiness down
+# should be lower than timeout
 set mail_check=25
-# how long to wait for user input before aborting so we can check mail
-set timeout=30
 # do not move messages from INBOX (spool) to mbox after reading them (just leave them there please)
 set move=no
-# instead of listing the imap INBOX as a mailbox so mutt can look for new mail, this will automatically add imap folders for checking
-# did not seem to keep me logged in though
-set imap_check_subscribed=yes
+# this set may actually filter down to subscribed folders, which maybe inbox is not a subscribed folder?
+# arch wiki suggests this is an alternative to manual specification of mailboxes command
+# set imap_check_subscribed
+# unset to force a new connection to be used when checking for new mail
+unset imap_passive
 
+# this folder will be checked regularly for new mail
+mailboxes =INBOX
 
 set spoolfile = "=INBOX"
 set record = "=Sent Items"
 set postponed = "=Drafts"
 # outlook is putting my trash here
 set trash = "=Deleted Items"
-# not needed as we have imap_check_subscribed turned on
-mailboxes =INBOX
 
 # make a copy of sent mail
 set copy=yes

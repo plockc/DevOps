@@ -37,7 +37,7 @@ if [[ -z "${isoFile}" ]]; then echo "You much specify an iso file with -f"; exit
 # isoFile gets passed to the script as first argument, script is sourced remotely
 bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageInstallToSDCard.sh) "$isoFile"
 
-echo Just remove (already ejected) the SD card and install to Raspberry Pi and power the Pi on, then hit enter to continue and use \"root\" for the password when prompted
+echo "Just remove (it is already ejected) the SD card and install to Raspberry Pi and power the Pi on, then hit enter to continue and use \"root\" for the password when prompted"
 
 sleep 25
 ssh root@alarmpi echo done!

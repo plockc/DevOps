@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 
 # USAGE: (run on the pi)
 # bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh)

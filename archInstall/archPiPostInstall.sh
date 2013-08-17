@@ -17,7 +17,9 @@ ln -is /usr/bin/darkstat /usr/sbin/darkstat
 
 # CHANGE PASSWORD IF STILL THE DEFAULT "ROOT"
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`
+echo salt
 defaultPass=`php -r "echo crypt('root', \"${salt//\$/\\\\\\$}\");"`
+echo def
 if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
 echo new pass
 read -s -p "Please enter a new root password: "

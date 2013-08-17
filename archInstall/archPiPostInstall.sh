@@ -50,7 +50,7 @@ fi
 ln --force -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 
 # SETUP SERVICES
-systemctl enable darkstat
+systemctl enable dhcpcd@eth0 darkstat
 
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE
 resize2fs /dev/mmcblk0p2

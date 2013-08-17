@@ -13,7 +13,7 @@ if (( `id -u` != 0 )); then
 fi
 
 pacman --noconfirm -Sy --needed php augeas darkstat unzip dnsutils rsync screen
-ln -s /usr/bin/darkstat /usr/sbin/darkstat
+ln -is /usr/bin/darkstat /usr/sbin/darkstat
 
 # CHANGE PASSWORD IF STILL THE DEFAULT "ROOT"
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`

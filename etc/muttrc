@@ -68,5 +68,12 @@ bind pager b previous-page
 macro pager \cu ": unset wait_key; set pipe-decode\n|urlview\n: set wait_key; unset pipe_decode\n" 'Follow links with urlview'
 bind pager <Up> previous-line
 bind pager <Down> next-line
+bind index L bottom-page
+
+macro index fi "<change-folder> =INBOX<enter>" "Go to inbox"
+macro index ft "<change-folder> =Deleted<quote-char> Items<enter>" "Go to all mail"
+macro index fs "<change-folder> =Sent<quote-char> Items<enter>" "Go to Sent Mail"
+macro index fd "<change-folder> =Drafts<enter>" "Go to drafts"
+macro index \Cfi "<flag-message>" "Flag message as important"
 
 

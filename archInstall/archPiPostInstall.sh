@@ -19,6 +19,7 @@ ln -is /usr/bin/darkstat /usr/sbin/darkstat
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`
 defaultPass=`php -r "echo crypt('root', \"${salt//\$/\\\\\\$}\");"`
 if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
+echo new pass
 read -s -p "Please enter a new root password: "
 NEW_PASSWORD=$REPLY
 echo

@@ -71,7 +71,6 @@ EOF
 if [[ ! -f /usr/share/webapps/dokuwiki/conf/local.php ]]; then
 	read -p "Enter a name for your Wiki: " wikiTitle
 	read -p "Enter a tagline for your Wiki: " wikiTagline
-	cp /usr/share/webapps/dokuwiki/conf/local.php  /usr/share/webapps/dokuwiki/conf/local.php.bak 2>/dev/null || true
 	cat > /usr/share/webapps/dokuwiki/conf/local.php << EOF
 <?php
 \$conf['title'] = "${wikiTitle}";
@@ -119,6 +118,14 @@ test -d /usr/share/webapps/dokuwiki/lib/plugins/pageredirect \
   || (mkdir /usr/share/webapps/dokuwiki/lib/plugins/pageredirect \
       && curl --location http://github.com/glensc/dokuwiki-plugin-pageredirect/tarball/master \
       | tar --strip-components=1 -zxC /usr/share/webapps/dokuwiki/lib/plugins/pageredirect)
+
+# https://www.dokuwiki.org/plugin:markdownextra
+test -d /usr/share/webapps/dokuwiki/lib/plugins/markdowku \
+  || (mkdir /usr/share/webapps/dokuwiki/lib/plugins/markdowku \
+      && curl --location http://komkon2.de/markdowku/markdowku.tgz \
+      | tar --strip-components=1 -zxC /usr/share/webapps/dokuwiki/lib/plugins/markdowku)
+
+# TODO: https://www.dokuwiki.org/plugin:dw2pdf
 
 chown -R http:http /usr/share/webapps/dokuwiki
 

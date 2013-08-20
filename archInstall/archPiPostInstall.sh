@@ -13,15 +13,12 @@ if (( `id -u` != 0 )); then
 fi
 
 pacman --noconfirm -Sy --needed php augeas darkstat unzip dnsutils rsync screen
-ln -is /usr/bin/darkstat /usr/sbin/darkstat
+ln --force -s /usr/bin/darkstat /usr/sbin/darkstat
 
 # CHANGE PASSWORD IF STILL THE DEFAULT "ROOT"
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`
-echo salt
 defaultPass=`php -r "echo crypt('root', \"${salt//\$/\\\\\\$}\");"`
-echo def
 if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
-echo new pass
 read -s -p "Please enter a new root password: "
 NEW_PASSWORD=$REPLY
 echo
@@ -53,7 +50,8 @@ fi
 ln --force -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 
 # SETUP SERVICES
-systemctl enable dhcpcd@eth0 darkstat
+# systemctl enable dhcpcd@eth0 darkstat
+systemctl enable darkstat
 
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE
 resize2fs /dev/mmcblk0p2
@@ -61,5 +59,4 @@ resize2fs /dev/mmcblk0p2
 echo
 echo Rebooting, please wait about 25 seconds before \"ssh "root@$HOSTNAME"\"
 
-reboot #25 seconds to reboot
-
+reboot #25 seconds to reboot, allow clean exit of remote shell

@@ -22,7 +22,8 @@ set move=no
 # arch wiki suggests this is an alternative to manual specification of mailboxes command
 # set imap_check_subscribed
 # unset to force a new connection to be used when checking for new mail
-unset imap_passive
+# 8/19 testing with this commented out, seems to work fine
+# unset imap_passive
 
 # this folder will be checked regularly for new mail
 mailboxes =INBOX
@@ -63,17 +64,22 @@ bind index \Cb previous-page
 bind index \Cf next-page
 bind pager \Cb previous-page
 bind pager \Cf next-page
+bind index \Cr imap-fetch-mail
 bind pager b previous-page
 # parse the message for urls with urlview, provide a menu selection, and launch an app, the wait_key set/unset is to avoid a confirmation from mutt
 macro pager \cu ": unset wait_key; set pipe-decode\n|urlview\n: set wait_key; unset pipe_decode\n" 'Follow links with urlview'
 bind pager <Up> previous-line
 bind pager <Down> next-line
 bind index L bottom-page
+bind index <backtab> previous-new-then-unread
+bind index I flag-message
+bind index G last-entry
+bind index f forward-message
 
-macro index fi "<change-folder> =INBOX<enter>" "Go to inbox"
-macro index ft "<change-folder> =Deleted<quote-char> Items<enter>" "Go to all mail"
-macro index fs "<change-folder> =Sent<quote-char> Items<enter>" "Go to Sent Mail"
-macro index fd "<change-folder> =Drafts<enter>" "Go to drafts"
-macro index \Cfi "<flag-message>" "Flag message as important"
+macro index gg "<first-entry>" "Go to first entry"
+macro index Fi "<change-folder> =INBOX<enter>" "Go to inbox"
+macro index Ft "<change-folder> =Deleted<quote-char> Items<enter>" "Go to all mail"
+macro index Fs "<change-folder> =Sent<quote-char> Items<enter>" "Go to Sent Mail"
+macro index Fd "<change-folder> =Drafts<enter>" "Go to drafts"
 
 

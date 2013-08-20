@@ -41,10 +41,15 @@ echo "Just remove (it is already ejected) the SD card and install to Raspberry P
 
 sleep 25
 # remove previous key since this one was just generated
-ssh-keygen -R alarmpi -f ~/.ssh/known_hosts
+ssh-keygen -R alarmpi
 # add current key
 ssh-keyscan alarmpi 2>/dev/null >> ~/.ssh/known_hosts
-ssh root@alarmpi echo done!
 
-# bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh)
-# ssh root@alarmpi bash \<\(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh\)
+bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) root@alarmpi
+
+# POST INSTALLATION
+set +e
+ssh root@alarmpi base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64) \| bash
+set -e
+
+sleep 25

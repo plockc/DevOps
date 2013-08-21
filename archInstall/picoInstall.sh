@@ -1,12 +1,41 @@
 #!/bin/bash
 
-# USAGE: (run on the pi)
-# bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/picoInstall.sh)
-#
+# 
+
 # Will create a personal blog (public to read but private to write)
 
 # abort if there is an error
 set -e
+
+####################
+# PROCESS OPTIONS
+####################
+function usage() {
+cat <<EOF
+$0: will install and configure pico blog on php / lighttpd / arch
+Usage: $(basename "$0") [switches] [--]
+      -t blogTitle    title of the blog
+      -h                 This help
+      
+Examples:
+bash <\(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/picoInstall.sh\)
+ssh root@host base64 --decode --ignore-garbage \<\<\< \$\(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/picoInstall.sh | base64\) \| bash
+EOF
+}
+
+# leading ':' to run silent, 'f:' means f need an argument, 'c' is just an option
+while getopts ":t:h" opt; do case $opt in
+	h)  usage; exit 0;;
+	t)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG" does not exist for -t; exit 1; fi
+	    wikiTitle="$OPTARG";;
+	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
+        # this happens when silent and missing argument for option
+	:)  usage; echo "-$OPTARG requires an argument" >&2; exit 1;;
+	*)  usage; echo "Unimplemented option: -$OPTARG" >&2; exit 1;; # catch-all
+esac; done
+
+if [[ -z "${wikiTitle}" ]]; then echo "You much specify a title for the blog with -t"; exit 1; fi
+
 
 #####################
 # INSTALL PACKAGES
@@ -56,14 +85,9 @@ fi
 # INSTALL DOKUWIKI
 ####################
 
-TMPDIR=$(mktemp -d)
-curl "https://codeload.github.com/gilbitron/Pico/zip/master" > $TMPDIR/pico.zip
-unzip $TMPDIR/pico.zip -d $TMPDIR
-mkdir -p /usr/share/webapps
-mv $TMPDIR/Pico-master /usr/share/webapps/pico
-rm $TMPDIR/pico.zip
-rmdir $TMPDIR
-mkdir /usr/share/webapps/pico/cache
+mkdir -p /usr/share/webapps/pico/cache
+curl "https://codeload.github.com/gilbitron/Pico/tar.gz/master" \
+  | tar --directory /usr/share/webapps/pico --strip-components=1 -zxvf -
 
 
 ####################
@@ -79,7 +103,7 @@ grep -q "conf.d/pico.conf" /etc/lighttpd/lighttpd.conf \
 
 # create the dokuwiki configuration for lighttpd
 test -f /etc/lighttpd/conf.d/pico.conf || cat > /etc/lighttpd/conf.d/pico.conf << EOF
-server.modules += ( "mod_access", "mod_alias" )
+server.modules += ( "mod_access", "mod_alias", "mod_rewrite" )
 alias.url += ("/pico" => "/usr/share/webapps/pico/")
 static-file.exclude-extensions = ( ".php" )
 \$HTTP["url"] =~ "/(\.|_)ht" { url.access-deny = ( "" ) }
@@ -114,4 +138,4 @@ chmod 744 /usr/share/webapps/pico
 systemctl enable lighttpd
 systemctl start lighttpd
 
-echo you can go to /wiki to view your blog
+echo you can go to /pico to view your blog

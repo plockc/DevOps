@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# 
-
 # Will create a personal blog (public to read but private to write)
+
+if [[ -d /usr/share/webapps/pico ]]; then
+	echo Pico already installed
+	exit
+fi
 
 # abort if there is an error
 set -e
@@ -19,7 +22,8 @@ Usage: $(basename "$0") [switches] [--]
       
 Examples:
 bash <\(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/picoInstall.sh\)
-ssh root@host base64 --decode --ignore-garbage \<\<\< \$\(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/picoInstall.sh | base64\) \| bash
+
+ssh root@doku2 bash \<\(base64 --decode --ignore-garbage \<\<\< \$\(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/picoInstall.sh \| base64\)\)
 EOF
 }
 
@@ -74,11 +78,6 @@ if [[ ! -f /etc/lighttpd/conf.d/fastcgi.conf ]]; then
 					   )
 					)
 EOF
-fi
-
-if [[ -d /usr/share/webapps/pico ]]; then
-	echo Pico already installed
-	exit
 fi
 
 ####################

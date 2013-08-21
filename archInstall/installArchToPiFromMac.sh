@@ -39,9 +39,15 @@ bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageI
 
 echo "Just remove (it is already ejected) the SD card and install to Raspberry Pi and power the Pi on, then hit enter to continue and use \"root\" for the password when prompted"
 
+read
 sleep 25
+
+# flush dns cache
+killall -HUP mDNSResponder
+
 # remove previous key since this one was just generated
 ssh-keygen -R alarmpi
+
 # add current key
 ssh-keyscan alarmpi 2>/dev/null >> ~/.ssh/known_hosts
 

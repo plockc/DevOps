@@ -1,8 +1,13 @@
+" do not worry about vi compatibility
+set nocompatible
+
+set encoding=utf-8 " Necessary to show Unicode glyphs
+
 " Comments lead with a double quote
 " turn on color highlighting
 syntax enable
-" turn on line numbering
-set number
+" turn on relative line numbering
+set relativenumber
 " turn on mouse for all modes
 set mouse=a
 
@@ -31,9 +36,53 @@ autocmd VimEnter * nested :call tagbar#autoopen(1)
 autocmd FileType * nested :call tagbar#autoopen(0)
 " :autocmd BufEnter * nested :call tagbar#autoopen(0)
 
-" solarized dark background
-set background=dark
+set background=dark " solarized dark background
+colorscheme solarized " solarized color scheme
+set t_Co=16 " mac vim sets up 256 color, the 16 palette should be chosen from solarized Terminal app
 
-" solarized color scheme
-colorscheme solarized
+set backspace=indent,eol,start " backspace will delete anything
+set title " change the title of the terminal window to the file being edited
+
+" http://vim.wikia.com/wiki/Converting_tabs_to_spaces
+set expandtab " expand tabs into spaces as you come across them
+set tabstop=4 " use 4 spaces for tabs
+set shiftwidth=4 " when indenting, use multiple of 4 spaces
+set shiftround " round off indenting to multiples of shiftwidth
+set copyindent " new lines inherit the current indent (and maybe contextual, not sure)
+set softtabstop=4 " backspace over space indentation will delete the indendation
+set smarttab
+
+set complete=t " only complete tags instead of buffer, and stuff, makes ctrl-p/n usable
+set completeopt=longest,menuone,preview " show only matches so far, and show menu even if only one choice
+set pumheight=7
+
+filetype plugin indent on " load java/c/etc. standard plugin and indentation rules
+set autoread " automatically re-read files that have changed
+autocmd CursorHold,CursorHoldI * checktime " if user pauses typing for 'updatetime' seconds (4), check for file modification
+
+set printoptions=paper:letter,duplex:off " Setup print options for hardcopy command.
+set showcmd " some extra info about the currnt command at the last line of screen
+
+" Allow left/right movement keys to "wrap" to the previous/next line.
+" b - backspace key
+" s - space key
+" [ - left arrow  (insert and replace modes)
+" ] - right arrow (insert and replace modes)
+set whichwrap=b,s,[,]
+set nostartofline " on large scale navigation, do not move to beginning of line
+
+set wrapscan " wrap around buffer when searching
+set incsearch " incremental searching - works well with highlighting
+set ignorecase " do not match case
+set smartcase " if you do type upper case anywhere, then it is case sensitive
+
+" use tabs/windows keep those edited buffers around
+" set hidden " can hide buffers even if there is an edit
+set tag=./tags;$HOME,tags,$HOME " stop search above home directory
+
+let mapleader=","
+
+" always show the powerline, and use unicode symbols
+set laststatus=2
+let g:Powerline_symbols = 'unicode'
 

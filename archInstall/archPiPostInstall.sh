@@ -1,4 +1,4 @@
-#!/bin/bash -i
+#!/bin/bash
 
 # USAGE: (run on the pi)
 # bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh)
@@ -19,17 +19,17 @@ ln --force -s /usr/bin/darkstat /usr/sbin/darkstat
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`
 defaultPass=`php -r "echo crypt('root', \"${salt//\$/\\\\\\$}\");"`
 if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
-read -s -p "Please enter a new root password: "
-NEW_PASSWORD=$REPLY
-echo
-read -s -p "Please confirm: "
-echo
+    read -s -p "Please enter a new root password: "  # -s for silent
+    NEW_PASSWORD=$REPLY
+    echo
+    read -s -p "Please confirm: "
+    echo
 
-if [[ ! $REPLY == $NEW_PASSWORD ]]; then
-  echo Passwords did not match, please try again
-  exit
-fi
-chpasswd << EOSF
+    if [[ ! "$REPLY" = "$NEW_PASSWORD" ]]; then
+        echo Passwords did not match, please try again
+        exit
+    fi
+    chpasswd << EOSF
 root:$NEW_PASSWORD
 EOSF
 fi

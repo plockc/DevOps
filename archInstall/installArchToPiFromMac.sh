@@ -40,7 +40,7 @@ bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageI
 echo "=================================================================================="
 echo "Just remove the SD card (it is already ejected) and install it to the Raspberry Pi then power on the Pi, then hit enter here to continue.  When prompted, use \"root\" as the default password"
 
-read
+read -p "Hit Enter to continue: "
 sleep 28
 
 # flush dns cache
@@ -53,6 +53,10 @@ ssh-keygen -R alarmpi
 ssh-keyscan alarmpi 2>/dev/null >> ~/.ssh/known_hosts
 
 bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) root@alarmpi
+
+echo "=================================================================================="
+echo "Pi OS installed, now configuring and updating packages
+echo "=================================================================================="
 
 # POST INSTALLATION
 set +e

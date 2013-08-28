@@ -42,6 +42,16 @@ set t_Co=16 " mac vim sets up 256 color, the 16 palette should be chosen from so
 
 set backspace=indent,eol,start " backspace will delete anything
 set title " change the title of the terminal window to the file being edited
+set undofile     " creates an undo file so you can undo after closing and reopening a file
+set nobackup            " do not create a backup (we are using the undo file)
+set noswapfile          " do not create a swapfile
+
+" navigate wrapped lines as if they were wrapped
+ nnoremap j gj
+ nnoremap k gk
+" faster command entry
+ nnoremap ; :
+"
 
 " http://vim.wikia.com/wiki/Converting_tabs_to_spaces
 set expandtab " expand tabs into spaces as you come across them
@@ -75,9 +85,13 @@ set wrapscan " wrap around buffer when searching
 set incsearch " incremental searching - works well with highlighting
 set ignorecase " do not match case
 set smartcase " if you do type upper case anywhere, then it is case sensitive
+"
+" ignore these files for completion
+set wildignore=*.swp,*.bak,*.class,*.o,*.jar,*.gif,*.jpg,*.png,*.bmp,*.svn-base,*/svn/*
+
 
 " use tabs/windows keep those edited buffers around
-" set hidden " can hide buffers even if there is an edit
+set hidden " can hide buffers even if there is an edit
 set tag=./tags;$HOME,tags,$HOME " stop search above home directory
 
 let mapleader=","
@@ -85,4 +99,37 @@ let mapleader=","
 " always show the powerline, and use unicode symbols
 set laststatus=2
 let g:Powerline_symbols = 'unicode'
+let g:Powerline_colorscheme='powerline_solarized_dark_16'
+
+
+" tagbar configuration if you install it
+" ---------------------------------------
+" one mouse click navigates
+let g:tagbar_singleclick = 1
+
+" open tabgar if file type supports it
+autocmd VimEnter * nested :call tagbar#autoopen(1)
+
+" open tagbar on supported file types for new editors within vim
+autocmd FileType * nested :call tagbar#autoopen(0)
+
+" open tagbar with new tab for supported file type, might be disabled because over aggressive? I forgot
+" :autocmd BufEnter * nested :call tagbar#autoopen(0)
+
+" map F8 to open/close the tagbar
+nmap <F8> :TagbarToggle<CR>
+autocmd vimenter * if !argc() | NERDTree | endif
+map <C-n> :NERDTreeToggle<CR>
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+let NERDTreeShowBookmarks=1
+let NERDTreeIgnore=['\.class$', '^CVS$', '\~$']
+" need this off to use netrw which is the only way to get VCSCommand to work across directories
+let NERDTreeHijackNetrw=0
+
+let g:EclimSignLevel=2 " only mark errors instead of a bazillion warnings
+nmap <F3> :JavaSearchContext<CR>
+let g:EclimCompletionMethod='omnifunc'   " also required for eclim to work
+
+let g:ctrlp_follow_symlinks = 1 " follow symlinks but avoid loops
+let g:ctrlp_max_files = 40000 " default only 10000
 

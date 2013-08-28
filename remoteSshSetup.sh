@@ -90,6 +90,7 @@ function testConnection {
 		echo && read -p "Add key? [Yn] "
 		if [[ ! $REPLY =~ ^[Nn]$ ]]; then
 			ssh-keyscan ${remoteHost} 2>/dev/null >> ${sshDir}/known_hosts
+			ssh-keyscan ${hostIp} 2>/dev/null >> ${sshDir}/known_hosts
 			echo && echo "Trying again"
 			testConnection
 		fi

@@ -55,7 +55,7 @@ bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh)
 
 # POST INSTALLATION
 set +e
-ssh root@alarmpi base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64) \| bash
+ssh -t root@alarmpi bash \<\(base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64)\) 
 set -e
 
 sleep 25

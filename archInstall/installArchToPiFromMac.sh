@@ -37,10 +37,11 @@ if [[ -z "${isoFile}" ]]; then echo "You much specify an iso file with -f"; exit
 # isoFile gets passed to the script as first argument, script is sourced remotely
 bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageInstallToSDCard.sh) "$isoFile"
 
-echo "Just remove (it is already ejected) the SD card and install to Raspberry Pi and power the Pi on, then hit enter to continue and use \"root\" for the password when prompted"
+echo "=================================================================================="
+echo "Just remove the SD card (it is already ejected) and install it to the Raspberry Pi then power on the Pi, then hit enter here to continue.  When prompted, use \"root\" as the default password"
 
 read
-sleep 25
+sleep 28
 
 # flush dns cache
 killall -HUP mDNSResponder
@@ -55,7 +56,11 @@ bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh)
 
 # POST INSTALLATION
 set +e
+# base64 the post install file locally then the remote bash will see a file of the base64 decoded contents
 ssh -t root@alarmpi bash \<\(base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64)\) 
 set -e
 
 sleep 25
+
+# really need to know the new host here, at which point we could tweak out the hostname for the key
+

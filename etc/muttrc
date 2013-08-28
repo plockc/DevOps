@@ -1,5 +1,5 @@
 source ~/.mutt/muttrc-$USER
-source ~/.mutt/solarized/mutt-colors-solarized-dark-16.muttrc
+source ~/.mutt/solarized/mutt-colors-solarized-dark-16-2.muttrc
 set use_from=yes
 set use_envelope_from=yes
 
@@ -54,7 +54,7 @@ bind index a group-reply
 bind pager a group-reply
 bind index e noop
 bind index h noop
-bind index m noop
+bind index m save-message
 bind index n mail
 bind index p noop
 bind index w noop

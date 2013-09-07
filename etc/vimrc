@@ -118,9 +118,9 @@ autocmd FileType * nested :call tagbar#autoopen(0)
 
 " map F8 to open/close the tagbar
 nmap <F8> :TagbarToggle<CR>
-autocmd vimenter * if !argc() | NERDTree | endif
+autocmd vimenter * if !argc() | NERDTree | wincmd p | endif
 map <C-n> :NERDTreeToggle<CR>
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
+" autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 let NERDTreeShowBookmarks=1
 let NERDTreeIgnore=['\.class$', '^CVS$', '\~$']
 " need this off to use netrw which is the only way to get VCSCommand to work across directories
@@ -132,4 +132,15 @@ let g:EclimCompletionMethod='omnifunc'   " also required for eclim to work
 
 let g:ctrlp_follow_symlinks = 1 " follow symlinks but avoid loops
 let g:ctrlp_max_files = 40000 " default only 10000
+
+map <Leader>mbe :MBEOpen<cr>
+map <Leader>mbc :MBEClose<cr>
+map <Leader>mbt :MBEToggle<cr>
+
+hi MBENormal               ctermbg=black ctermfg=white
+hi MBEChanged              ctermbg=black ctermfg=yellow
+hi MBEVisibleNormal        ctermbg=black ctermfg=white cterm=bold
+hi MBEVisibleChanged       ctermbg=black ctermfg=yellow cterm=bold
+hi MBEVisibleActiveNormal  ctermbg=white ctermfg=black cterm=bold
+hi MBEVisibleActiveChanged ctermbg=yellow ctermfg=black cterm=bold
 

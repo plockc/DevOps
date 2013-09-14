@@ -1,16 +1,36 @@
 set -e
 
-function usage {
-	echo ./remoteSshSetup \[user\@\]remoteHost 
+function usage() {
+cat <<EOF
+$(basename "$0"): will set up ssh keys for remote host
+Usage: $(basename "$0") [switches] [--] \[user\@\]remoteHost
+      -h              This help
+      -p descriptor   The numerical id (like 1 for stdin) to read the password
+                      This is used by sshpass to help set up ssh connection to avoid terminal input
+                      Examples: echo "password" | $0 -p0 remoteUser@remoteHost
+                               $0 -p3 remoteUser@remoteHost 3<<<"password"
+EOF
 }
 
-if (( $# != 1 )); then usage; exit 1; fi
+# leading ':' to run silent, 'f:' means f need an argument, 'h' is just an option
+while getopts ":f:hp:" opt; do case $opt in
+	h)  usage; exit 0;;
+	p)  PASS=$(cat /dev/fd/${OPTARG});;
+	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
+        # this happens when silent and missing argument for option
+	:)  usage; echo "-$OPTARG requires an argument" >&2; exit 1;;
+	*)  usage; echo "Unimplemented option: -$OPTARG" >&2; exit 1;; # catch-all
+esac; done
+
+shift $((OPTIND-1))
+
+if (( $# != 1 )); then echo "missing remoteHost"; echo; usage; exit 1; fi
 
 # GET THE REMOTE HOST
 remoteHost=${1#*@} # sucks away all the leading characters until @
 
 hostCheck=$(host ${remoteHost})
-# CHECK FOR REMOTE HOST EXISTANCE
+# CHECK FOR REMOTE HOST EXISTENCE
 if [[ ! "${hostCheck}" =~ "has address" ]]; then
 	echo Cannot resolve host ${remoteHost}
 	exit 1
@@ -23,13 +43,11 @@ remoteUser=${1/${remoteHost}/} # sucks away all the trailing characters after an
 remoteUser=${remoteUser%?} # removes trailing @
 remoteUser=${remoteUser:=$USER}
 
-(( `id -u` == 0 )) && sshDir='/var/root/.ssh' || sshDir=~/.ssh
-
 function deleteKey {
 	echo && read -p "Delete old key? [Yn] "
 	if [[ ! $REPLY =~ ^[Nn]$ ]]; then
 		echo removing old keys for $1
-		ssh-keygen -R $1 -f ${sshDir}/known_hosts
+		ssh-keygen -R $1
 	fi
 }
 
@@ -54,43 +72,48 @@ function testConnection {
 		if ! which -s ssh-copy-id; then
 			# suggest installing homebrew
 			if ! which -s brew; then
-			  echo "Install homebrew or ssh-copy-id so we can install ssh keys, to install homebrew:"
-			  echo ruby -e \"\$\(curl -fsSL https://raw.github.com/mxcl/homebrew/go\)\";
-			  exit 1;
-			else
-			  echo brew installing ssh-copy-id
-			  brew install ssh-copy-id;
+			  echo "on mac, homebrew can install ssh-copy-id, to install homebrew:"
+			  echo && echo ruby -e \"\$\(curl -fsSL https://raw.github.com/mxcl/homebrew/go\)\";
+			  echo && echo then install ssh-copy-id like:
+			  echo && echo brew install ssh-copy-id
 			fi
+			echo either install ssh keys yourself or install ssh-copy-id and rerun this script, it will copy ssh keys to ${remoteHost} for you
+            exit 1;
 		fi
 		# set up ssh keys for root account
-		if [[ ! -e ${sshDir}/id_dsa ]]; then
-		  echo Creating dsa key for ssh
-		  mkdir -p ${sshDir}
-		  ssh-keygen -q -N '' -t dsa -f ${sshDir}/id_dsa;
+		if [[ ! -e ~/.ssh/id_dsa ]]; then
+		  echo Creating dsa key for ssh and adding to ssh-agent, come back later and encrypt your provate key with a passphrase
+		  mkdir -m 700 -p ~/.ssh
+		  ssh-keygen -q -N '' -t dsa -f ~/.ssh/id_dsa;
+		  ssh-add
 		fi
 		# copy key to the destination server
 		echo copying key to $remoteHost
-		if ssh-copy-id -i ${sshDir}/id_dsa.pub ${remoteUser}@${remoteHost} > /dev/null; then
-		  echo && echo "Trying again"
-		  testConnection
-		fi
+		if [[ -z "${PASS}" ]]; then
+            ssh-copy-id -i ~/.ssh/id_dsa.pub ${remoteUser}@${remoteHost} > /dev/null;
+		else
+    		# add all keys registered with ssh-agent to remote authorized keys using sshpass to allow password auth
+	        ssh-add -L | sshpass -d3 ssh ${remoteUser}@${remoteHost} "test -d ~/.ssh || mkdir --mode=700 .ssh; cat >> ~/.ssh/authorized_keys" 3<<<"$PASS"
+	    fi
+        echo && echo "Trying again"
+		testConnection
 	elif [[ $sshConnection =~ "Host key verification failed" || $sshConnection =~ "Host key changed" ]]; then
 		echo && echo "Remote Fingerprint"
 		ssh-keyscan ${remoteHost} 2>/dev/null | ssh-keygen -lv -F ${remoteHost} -f /dev/stdin
-		if grep -q ${remoteHost} ${sshDir}/known_hosts; then
-			echo && echo "Host key has changed, Current entry for Host:"
-			ssh-keygen -lv -F ${remoteHost} -f ${sshDir}/known_hosts
+		if grep -q ${remoteHost} ~/.ssh/known_hosts; then
+			echo && echo "Host key has changed, deleting entry for Host ${remoteHost}:"
+			ssh-keygen -lv -F ${remoteHost} -f ~/.ssh/known_hosts
 			deleteKey ${remoteHost}
 		fi
-		if grep -q ${hostIp} ${sshDir}/known_hosts; then
-			echo && echo "Current entry for IP:"
-			ssh-keygen -lv -F ${hostIp} -f ${sshDir}/known_hosts
+		if grep -q ${hostIp} ~/.ssh/known_hosts; then
+			echo && echo "Deleting entry for IP ${hostIp}:"
+			ssh-keygen -lv -F ${hostIp} -f ~/.ssh/known_hosts
 			deleteKey ${hostIp}
 		fi
 		echo && read -p "Add key? [Yn] "
 		if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-			ssh-keyscan ${remoteHost} 2>/dev/null >> ${sshDir}/known_hosts
-			ssh-keyscan ${hostIp} 2>/dev/null >> ${sshDir}/known_hosts
+			ssh-keyscan ${remoteHost} 2>/dev/null >> ~/.ssh/known_hosts
+			ssh-keyscan ${hostIp} 2>/dev/null >> ~/.ssh/known_hosts
 			echo && echo "Trying again"
 			testConnection
 		fi

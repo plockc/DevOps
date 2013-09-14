@@ -13,17 +13,28 @@ fi
 
 function usage() {
 cat <<EOF
-setupArchOnPi: will install and configure arch linux on a raspberry pi
+$(basename "$0"): will install and configure arch linux on a raspberry pi
 Usage: $(basename "$0") [switches] [--]
       -f archImage    Location of the arch linux image .iso
-      -h                 This help
+      -u user         Local user that needs to be set up for ssh
+                      Defaults to the user that is running this as sudo (or root if root)
+      -h              This help
+      -p descriptor   The numerical id (like 1 for stdin) to read the password
+                      This is used by sshpass to help set up ssh connectivity to avoid terminal input
+                      Examples: echo "password" | $0 -p0 remoteUser@remoteHost
+                               $0 -p3 remoteUser@remoteHost 3<<<"password"
 Hint: if you see end of file without any output, make sure you can ssh without problems
 EOF
 }
 
+# setup ssh user default, can be overridden below
+if [[ -n "${SSH_USER}" ]]; then ssh_user="${SSH_USER}"; else ssh_user="${USER}"; fi
+
 # leading ':' to run silent, 'f:' means f need an argument, 'c' is just an option
-while getopts ":f:h" opt; do case $opt in
+while getopts ":f:hu:p:" opt; do case $opt in
 	h)  usage; exit 0;;
+	p)  PASS="${OPTARG}"; useSshPass="-p 0";;
+	u)  ssh_user="${OPTARG}";;
 	f)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG" does not exist for -f; exit 1; fi
 	    isoFile="$OPTARG";;
 	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
@@ -46,13 +57,11 @@ sleep 28
 # flush dns cache
 killall -HUP mDNSResponder
 
-# remove previous key since this one was just generated
-ssh-keygen -R alarmpi
+# #############
+#  NEED TO FIGURE OUT WHICH USER TO RUN AS
+# #############
 
-# add current key
-ssh-keyscan alarmpi 2>/dev/null >> ~/.ssh/known_hosts
-
-bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) root@alarmpi
+su -l ${ssh_user} bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) ${useSshPass} root@alarmpi <<< "${PASS}"
 
 echo "=================================================================================="
 echo "Pi OS installed, now configuring and updating packages

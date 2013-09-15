@@ -8,7 +8,7 @@ Usage: $(basename "$0") [switches] [--] \[user\@\]remoteHost
       -p descriptor   The numerical id (like 1 for stdin) to read the password
                       This is used by sshpass to help set up ssh connection to avoid terminal input
                       Examples: echo "password" | $0 -p0 remoteUser@remoteHost
-                               $0 -p3 remoteUser@remoteHost 3<<<"password"
+                                $0 -p3 remoteUser@remoteHost 3<<<"password"
 EOF
 }
 

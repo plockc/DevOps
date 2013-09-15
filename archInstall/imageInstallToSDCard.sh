@@ -13,7 +13,7 @@ if [[ $# == 0 ]]; then echo && echo Please have the image path as the first argu
 
 if ! test -f "$1"; then echo && echo Image file "$1" does not exist && echo && exit; fi
 
-echo && read -p "Eject SD Card if it is inserted then hit enter to continue"
+echo && read -p "Eject and remove SD Card if it is inserted then hit enter to continue"
 
 disksBefore=`diskutil list | awk '/^\/dev\/disk/ {print $0}'`
 

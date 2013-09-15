@@ -53,19 +53,19 @@ esac; done
 if [[ -z "${isoFile}" ]]; then echo "You much specify an iso file with -f"; exit 1; fi
 
 # isoFile gets passed to the script as first argument, script is sourced remotely
-#bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageInstallToSDCard.sh) "$isoFile"
+bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageInstallToSDCard.sh) "$isoFile"
 
 echo "=================================================================================="
 echo "Just remove the SD card (it is already ejected) and install it to the Raspberry Pi then power on the Pi, then hit enter here to continue.  When prompted, use \"root\" as the default password"
 
 # read -p "Hit Enter to continue: "
-#sleep 28
+sleep 28
 
 # flush dns cache
-#killall -HUP mDNSResponder
+killall -HUP mDNSResponder
 
 # let DNS come back
-#sleep 3
+sleep 3
 
 # #############
 #  NEED TO TEST THIS!

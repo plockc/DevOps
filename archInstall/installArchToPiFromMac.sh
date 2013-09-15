@@ -83,6 +83,7 @@ echo "==========================================================================
 set +e
 # base64 the post install file locally then the remote bash will see a file of the base64 decoded contents
 # the NEWSPASSWORD must come last as it includes a file descriptor
+# and the fd3 must be quoted so it is executed on the remote box and not locally
 su -l ${ssh_user} -c 'ssh -t root@alarmpi bash \<\(base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64)\) '"${NEWHOSTNAME} ${PASSFLAG} '3<<<\"${NEWPASSWORD}\"'"
 set -e
 

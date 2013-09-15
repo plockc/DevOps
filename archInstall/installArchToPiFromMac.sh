@@ -64,16 +64,13 @@ sleep 28
 # flush dns cache
 killall -HUP mDNSResponder
 
-# let DNS come back
-sleep 3
-
 # #############
 #  NEED TO TEST THIS!
 # #############
 
-echo Setting up ssh connectivity for ${ssh_user} to root user on raspberry pi, you may be prompted for ssh key passphrases
+echo && echo Setting up ssh connectivity for ${ssh_user} to root user on raspberry pi, you may be prompted for ssh key passphrases
 # the -l on the bash is needed to get the proper PATH
-su -l ${ssh_user} -c 'eval $(ssh-agent 2>/dev/null) && echo adding keys && (ssh-add || echo no keys found) && echo setting up && bash -l <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) -p 3 root@alarmpi 3<<< "root"'
+su -l ${ssh_user} -c 'eval $(ssh-agent) > /dev/null && echo adding keys && (ssh-add || echo no keys found) && echo setting up && bash -l <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) -p 3 root@alarmpi 3<<<"root"'
 
 echo "=================================================================================="
 echo "Pi OS installed, now configuring and updating packages"

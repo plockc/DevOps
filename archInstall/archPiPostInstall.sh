@@ -29,7 +29,7 @@ EOF
 # leading ':' to run silent, 'f:' means f need an argument, 'h' is just an option
 while getopts ":hn:p:" opt; do case $opt in
 	h)  usage; exit 0;;
-	p)  NEWPASS="${OPTARG}";;
+	p)  NEWPASS=$(cat /dev/fd/${OPTARG});;
 	n)  NEWHOSTNAME="${OPTARG}";;
 	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
         # this happens when silent and missing argument for option
@@ -58,7 +58,7 @@ if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
         fi
     fi
     chpasswd << EOSF
-root:$NEW_PASSWORD
+root:$NEWPASS
 EOSF
 fi
 

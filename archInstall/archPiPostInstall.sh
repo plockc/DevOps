@@ -62,9 +62,9 @@ root:$NEWPASS
 EOSF
 fi
 
-echo && echo Setting hostname
+echo && echo Setting hostname to $NEWHOSTNAME
 # UPDATE HOSTNAME
-if grep alarmpi <<< `hostname`; then
+if grep -q alarmpi <<< `hostname`; then
   if [[ -z "${NEWHOSTNAME}" ]]; then
 	  read -p "Please enter the full host name for this Pi: "
 	  NEWHOSTNAME=$REPLY

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# USAGE: (run on the pi)
+# EXAMPLE USAGE: (run on the pi)
 # bash <(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh)
 
-# TODO: request for hostname and for a initial password
+# TODO: option for timezone
 
 set -e
 
@@ -12,51 +12,84 @@ if (( `id -u` != 0 )); then
   exit 1
 fi
 
+function usage() {
+cat <<EOF
+$(basename "$0"): expands filesystem, ensures non-default root password, hostname,
+                    and adds utilities plus php
+Usage: $(basename "$0") [switches] [--]
+      -n hostname.domain   New hostname and domain for the pi
+      -h                   This help
+      -p descriptor        The numerical id (like 1 for stdin) to read the new root password
+                           This is used by sshpass to help set up ssh connectivity to avoid terminal input
+                           Examples: echo "password" | $0 -p0 remoteUser@remoteHost
+                                     read -p "new pass: " && echo $REPLY | $0 -p0 
+EOF
+}
+
+# leading ':' to run silent, 'f:' means f need an argument, 'h' is just an option
+while getopts ":hn:p:" opt; do case $opt in
+	h)  usage; exit 0;;
+	p)  NEWPASS="${OPTARG}";;
+	n)  NEWHOSTNAME="${OPTARG}";;
+	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
+        # this happens when silent and missing argument for option
+	:)  usage; echo "-$OPTARG requires an argument" >&2; exit 1;;
+	*)  usage; echo "Unimplemented option: -$OPTARG" >&2; exit 1;; # catch-all
+esac; done
+
 pacman --noconfirm -Sy --needed php augeas darkstat unzip dnsutils rsync screen
 ln --force -s /usr/bin/darkstat /usr/sbin/darkstat
 
+echo && echo Setting new root password
 # CHANGE PASSWORD IF STILL THE DEFAULT "ROOT"
 salt=`grep root /etc/shadow | sed 's/root:\(\$.*\$.*\)\$.*/\1/'`
 defaultPass=`php -r "echo crypt('root', \"${salt//\$/\\\\\\$}\");"`
 if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
-    read -s -p "Please enter a new root password: "  # -s for silent
-    NEW_PASSWORD=$REPLY
-    echo
-    read -s -p "Please confirm: "
-    echo
+    if [[ -z "${NEWPASS}" ]]; then
+        read -s -p "Please enter a new root password: "  # -s for silent
+        NEWPASS=$REPLY
+        echo
+        read -s -p "Please confirm: "
+        echo
 
-    if [[ ! "$REPLY" = "$NEW_PASSWORD" ]]; then
-        echo Passwords did not match, please try again
-        exit
+        if [[ ! "$REPLY" = "$NEW_PASSWORD" ]]; then
+            echo Passwords did not match, please try again
+            exit
+        fi
     fi
     chpasswd << EOSF
 root:$NEW_PASSWORD
 EOSF
 fi
 
+echo && echo Setting hostname
 # UPDATE HOSTNAME
 if grep alarmpi <<< `hostname`; then
-  read -p "Please enter the full host name for this Pi: "
-  HOSTNAME=$REPLY
-  if [[ $HOSTNAME == "" ]]
-  then
-    echo Please try again with a valid host name
-    exit;
+  if [[ -z "${NEWHOSTNAME}" ]]; then
+	  read -p "Please enter the full host name for this Pi: "
+	  NEWHOSTNAME=$REPLY
+	  if [[ $HOSTNAME == "" ]]
+	  then
+		echo Please try again with a valid host name
+		exit;
+	  fi
   fi
-  echo $HOSTNAME > /etc/hostname
+  echo $NEWHOSTNAME > /etc/hostname
 fi
 
+echo && echo Setting up timezone
 # SETUP TIMEZONE
 ln --force -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 
+echo && echo Enabling darkstat
 # SETUP SERVICES
 # systemctl enable dhcpcd@eth0 darkstat
 systemctl enable darkstat
 
+echo && echo Resizing filesystem to match the full partition size
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE
 resize2fs /dev/mmcblk0p2
 
-echo
-echo Rebooting, please wait about 25 seconds before \"ssh "root@$HOSTNAME"\"
+echo && echo Rebooting, please wait about 28 seconds before reboot to complete
 
-reboot #25 seconds to reboot, allow clean exit of remote shell
+reboot #would be nice to figure out how to cleanly exit here

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e
 
 function usage() {
@@ -29,7 +31,10 @@ if (( $# != 1 )); then echo "missing remoteHost"; echo; usage; exit 1; fi
 # GET THE REMOTE HOST
 remoteHost=${1#*@} # sucks away all the leading characters until @
 
+set +e
 hostCheck=$(host ${remoteHost})
+set -e
+
 # CHECK FOR REMOTE HOST EXISTENCE
 if [[ ! "${hostCheck}" =~ "has address" ]]; then
 	echo Cannot resolve host ${remoteHost}

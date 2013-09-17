@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Will create a personal blog (public to read but private to write)
+# bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/picoInstall.sh)
 
 if [[ -d /usr/share/webapps/pico ]]; then
 	echo Pico already installed
@@ -30,7 +31,7 @@ EOF
 # leading ':' to run silent, 'f:' means f need an argument, 'c' is just an option
 while getopts ":t:h" opt; do case $opt in
 	h)  usage; exit 0;;
-	t)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG" does not exist for -t; exit 1; fi
+	t)  if [[ -z "$OPTARG" ]]; then usage; echo need title with -t; exit 1; fi
 	    wikiTitle="$OPTARG";;
 	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
         # this happens when silent and missing argument for option

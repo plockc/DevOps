@@ -115,7 +115,7 @@ function testConnection {
 			ssh-keygen -lv -F ${hostIp} -f ~/.ssh/known_hosts
 			deleteKey ${hostIp}
 		fi
-		echo && read -p "Add key? [Yn] "
+		echo && read -p "Add new host key? [Yn] "
 		if [[ ! $REPLY =~ ^[Nn]$ ]]; then
 			ssh-keyscan ${remoteHost} 2>/dev/null >> ~/.ssh/known_hosts
 			ssh-keyscan ${hostIp} 2>/dev/null >> ~/.ssh/known_hosts

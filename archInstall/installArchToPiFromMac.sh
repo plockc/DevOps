@@ -58,11 +58,16 @@ bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/imageI
 echo "=================================================================================="
 echo "Just remove the SD card (it is already ejected) and install it to the Raspberry Pi then power on the Pi, then hit enter here to continue.  When prompted, use \"root\" as the default password"
 
-# read -p "Hit Enter to continue: "
-sleep 28
+read -p "Hit Enter to continue: "
+echo Waiting for boot process to complete
+sleep 40
 
 # flush dns cache
 killall -HUP mDNSResponder
+
+set +e
+echo pi comes up as $(host alarmpi)
+set -e
 
 # #############
 #  NEED TO TEST THIS!
@@ -84,5 +89,11 @@ set +e
 su -l ${ssh_user} -c 'ssh -t root@alarmpi bash \<\(base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64)\) '"${NEWHOSTNAME} ${PASSFLAG} '3<<<\"${NEWPASSWORD}\"'"
 set -e
 
+# TODO: set up host keys for new hostname, instead of alarmpi
+
 echo Finished post installation, waiting for the reboot
-sleep 28
+sleep 40
+
+echo Removing any old keys for ${NEWHOSTNAME} and adding new host key
+ssh-keygen -R ${NEWHOSTNAME}
+ssh-keyscan ${NEWHOSTNAME} 2>/dev/null >> ~/.ssh/known_hosts

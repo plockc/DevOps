@@ -24,7 +24,6 @@ Usage: $(basename "$0") [switches] [--]
 Examples:
 bash <\(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/picoInstall.sh\)
 
-ssh root@doku2 bash \<\(base64 --decode --ignore-garbage \<\<\< \$\(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/picoInstall.sh \| base64\)\)
 EOF
 }
 

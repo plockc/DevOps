@@ -38,6 +38,7 @@ set trash = "=Deleted Items"
 set copy=yes
 
 set sort=threads
+set sort_aux=last-date-received
 
 # keep a cache of headers for faster loading
 set header_cache=~/.mutt/hcache

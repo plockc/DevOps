@@ -15,7 +15,7 @@
 set -e
 
 function usage {
-	echo ./setupBakup \<label\> \<backupTemplateFile\> \[user\@\]remoteHost 
+	echo "$0" \<label\> \<backupTemplateFile\> \[user\@\]remoteHost 
 }
 
 if (( $# == 0 )); then usage; exit 1; fi
@@ -55,14 +55,13 @@ elif [[ ! -e "${backupDestinationDir}" ]]; then
 fi
 chmod 700 ${backupDestinationDir} || echo weird chmod exit status
 
-
 # CREATE RSNAPSHOT CONFIGURATION
-if (( `id -u` == 0 )); then
-	rsnapshotConfigBase='/var/root/.rsnapshot'
-	lockfile="/var/run/rsnapshot-${remoteHost}-${remoteUser}-${label}.pid'
-else
+if (( `id -u` != 0 )); then
 	rsnapshotConfigBase=~/.rsnapshot
-	lockfile='/.rsnapshot/rsnapshot-${remoteHost}-${remoteUser}-${label}.pid'
+	lockfile=~"/.rsnapshot/rsnapshot-${remoteHost}-${remoteUser}-${label}.pid"
+else
+	rsnapshotConfigBase='/var/root/.rsnapshot'
+	lockfile="/var/run/rsnapshot-${remoteHost}-${remoteUser}-${label}.pid"
 fi
 rsnapshotConfigParentDir="${rsnapshotConfigBase}/${remoteHost}"
 rsnapshotConfig="${rsnapshotConfigParentDir}/${remoteUser}-${label}.config"
@@ -132,3 +131,5 @@ createPlist hourly "$(keyVal Minute 0)"
 createPlist daily  "$(keyVal Hour 1)$(keyVal Minute 10)"
 createPlist weekly "$(keyVal Weekday 0)$(keyVal Hour 2)$(keyVal Minute 25)"
 createPlist monthly "$(keyVal Day 1)$(keyVal Hour 3)$(keyVal Minute 40)"
+
+echo && echo done setting up backups for $label

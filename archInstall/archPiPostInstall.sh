@@ -83,8 +83,8 @@ ln --force -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 
 echo && echo Enabling darkstat
 # SETUP SERVICES
-# systemctl enable dhcpcd@eth0 darkstat
-systemctl enable darkstat
+systemctl enable dhcpcd@eth0 darkstat
+# systemctl enable darkstat
 
 echo && echo Resizing filesystem to match the full partition size
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE

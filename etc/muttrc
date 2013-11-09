@@ -34,8 +34,18 @@ set postponed = "=Drafts"
 # outlook is putting my trash here
 set trash = "=Deleted Items"
 
+set nomark_old # do not mark unread messages as old when closing mailbox
+set noconfirmappend # if mailbox exists, no prompt to add a message to it
+
 # make a copy of sent mail
 set copy=yes
+set include    # include message when replying
+# get rid of the 72 column wrapping that is mutt default
+set editor="vim +':set textwidth=0' +':set wrapmargin=0' +':set wrap'"
+set pager_stop # invoking next-page will not go to the next message by accident
+set pager_index_lines=6 #show the index when paging around messages
+set index_format="%Z %{%b %d %R} %-15.15L %s"
+
 
 set sort=threads
 set sort_aux=last-date-received
@@ -44,6 +54,8 @@ set sort_aux=last-date-received
 set header_cache=~/.mutt/hcache
 set message_cachedir=~/.mutt/bcache
 
+# try to show text before html
+alternative_order text/enriched text/plain text
 # inline text/html
 auto_view text/html
 
@@ -68,7 +80,8 @@ bind pager \Cf next-page
 bind index \Cr imap-fetch-mail
 bind pager b previous-page
 # parse the message for urls with urlview, provide a menu selection, and launch an app, the wait_key set/unset is to avoid a confirmation from mutt
-macro pager \cu ": unset wait_key; set pipe-decode\n|urlview\n: set wait_key; unset pipe_decode\n" 'Follow links with urlview'
+macro pager \cu ": unset wait_key; \n|urlview\n: set wait_key\n" 'Follow links with urlview'
+# macro pager \cu ": unset wait_key; set pipe-decode\n|urlview\n: set wait_key; unset pipe_decode\n" 'Follow links with urlview'
 bind pager <Up> previous-line
 bind pager <Down> next-line
 bind index L bottom-page

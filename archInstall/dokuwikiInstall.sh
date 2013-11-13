@@ -130,7 +130,7 @@ test -d /usr/share/webapps/dokuwiki/lib/plugins/markdowku \
 
 chown -R http:http /usr/share/webapps/dokuwiki
 
-chmod 744 /var/lib/dokuwiki
+chmod 755 /var/lib/dokuwiki
 
 systemctl enable lighttpd
 systemctl restart lighttpd

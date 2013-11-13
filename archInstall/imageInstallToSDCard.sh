@@ -9,9 +9,9 @@ if (( `id -u` != 0 )); then
   exit 1
 fi
 
-if [[ $# == 0 ]]; then echo && echo Please have the image path as the first argument && echo && exit 1; fi
+if [[ $# == 0 ]]; then printf "\nPlease have the image path as the first argument\n"; exit 1; fi
 
-if ! test -f "$1"; then echo && echo Image file "$1" does not exist && echo && exit 1; fi
+if ! test -f "$1"; then printf "\nImage file "$1" does not exist\n"; exit 1; fi
 
 echo && read -p "Eject and remove SD Card if it is inserted then hit enter to continue"
 
@@ -85,7 +85,7 @@ write
 quit
 EOF
 
-echo && echo "Updated partition table, results:" && echo
+printf "\nUpdated partition table, results:\n"
 
 sudo fdisk $newDisk
 

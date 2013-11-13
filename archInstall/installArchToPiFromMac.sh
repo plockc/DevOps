@@ -39,9 +39,11 @@ if [[ -n "${SUDO_USER}" ]]; then ssh_user="${SUDO_USER}"; else ssh_user="${USER}
 # leading ':' to run silent, 'f:' means f need an argument, 'h' is just an option
 while getopts ":f:hu:n:p:" opt; do case $opt in
 	h)  usage; exit 0;;
+	    # user passes in the file descriptor for this script to read in the password
+	    # then we will use fd3 to pass it into the archiPiPostInstall script
 	p)  PASSFLAG=" -p 3"; NEWPASSWORD=$(cat /dev/fd/${OPTARG});;
 	u)  ssh_user="${OPTARG}";;
-	n)  NEWHOSTNAME="-n ${OPTARG}";;
+	n)  NEWHOSTNAME="${OPTARG}"; $NEWHOSTNAME_POST_INSTALL_FLAG="-n ${NEWHOSTNAME};;
 	f)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG" does not exist for -f; exit 1; fi
 	    isoFile="$OPTARG";;
 	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
@@ -86,7 +88,7 @@ set +e
 # base64 the post install file locally then the remote bash will see a file of the base64 decoded contents
 # the NEWSPASSWORD must come last as it includes a file descriptor
 # and the fd3 must be quoted so it is executed on the remote box and not locally
-su -l ${ssh_user} -c 'ssh -t root@alarmpi bash \<\(base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64)\) '"${NEWHOSTNAME} ${PASSFLAG} '3<<<\"${NEWPASSWORD}\"'"
+su -l ${ssh_user} -c 'ssh -t root@alarmpi bash \<\(base64 --decode --ignore-garbage \<\<\< $(curl -fsSL https://raw.github.com/plockc/ArchDevOps/master/archInstall/archPiPostInstall.sh | base64)\) '"${NEWHOSTNAME_POST_INSTALL_FLAG} ${PASSFLAG} '3<<<\"${NEWPASSWORD}\"'"
 set -e
 
 # TODO: set up host keys for new hostname, instead of alarmpi
@@ -95,5 +97,4 @@ echo Finished post installation, waiting for the reboot
 sleep 40
 
 echo Removing any old keys for ${NEWHOSTNAME} and adding new host key
-ssh-keygen -R ${NEWHOSTNAME}
-ssh-keyscan ${NEWHOSTNAME} 2>/dev/null >> ~/.ssh/known_hosts
+su -l ${ssh_user} -c "bash -l <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) root@${NEWHOSTNAME}"

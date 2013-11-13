@@ -104,8 +104,8 @@ grep -q "conf.d/pico.conf" /etc/lighttpd/lighttpd.conf \
 test -f /etc/lighttpd/conf.d/pico.conf || cat > /etc/lighttpd/conf.d/pico.conf << EOF
 server.modules += ( "mod_access", "mod_alias", "mod_rewrite" )
 alias.url += ("/pico" => "/usr/share/webapps/pico/")
-static-file.exclude-extensions = ( ".php" )
-\$HTTP["url"] =~ "/(\.|_)ht" { url.access-deny = ( "" ) }
+static-file.exclude-extensions += ( ".php" )
+\$HTTP["url"] =~ "/(\.|_)ht" { url.access-deny += ( "" ) }
 \$HTTP["url"] =~ "^/pico/(lib|vendor)/+.*"  { url.access-deny = ( "" ) }
 url.rewrite-once = (
     "^/pico/content/(.*)\.md" => "/pico/index.php"
@@ -135,6 +135,6 @@ chown -R http:http /usr/share/webapps/pico
 chmod 744 /usr/share/webapps/pico
 
 systemctl enable lighttpd
-systemctl start lighttpd
+systemctl restart lighttpd
 
 echo you can go to /pico to view your blog

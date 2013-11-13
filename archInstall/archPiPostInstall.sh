@@ -82,14 +82,15 @@ echo && echo Setting up timezone
 ln --force -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 
 echo && echo Enabling darkstat
-# SETUP SERVICES
-systemctl enable dhcpcd@eth0 darkstat
 # systemctl enable darkstat
 
 echo && echo Resizing filesystem to match the full partition size
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE
 resize2fs /dev/mmcblk0p2
 
-echo && echo Rebooting, please wait about 28 seconds before reboot to complete
+# let things settle down before going with dhcp else ip will be ignored for some reason
+echo "PRE_UP=\"sleep 5\"" >> /etc/network.d/ethernet-eth0
+
+printf "\nRebooting, please wait about 28 seconds before reboot to complete\n"
 
 reboot #would be nice to figure out how to cleanly exit here

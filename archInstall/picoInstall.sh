@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Will create a personal blog (public to read but private to write)
-# bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/picoInstall.sh)
+# bash <(curl -fsSL https://raw.github.com/plockc/DevOps/master/archInstall/picoInstall.sh) -t "Blog Title Here"
 
 if [[ -d /usr/share/webapps/pico ]]; then
 	echo Pico already installed

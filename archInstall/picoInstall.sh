@@ -5,7 +5,7 @@
 
 if [[ -d /usr/share/webapps/pico ]]; then
 	echo Pico already installed
-	exit
+	exit 1;
 fi
 
 # abort if there is an error

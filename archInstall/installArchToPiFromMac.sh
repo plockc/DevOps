@@ -67,13 +67,9 @@ sleep 40
 # flush dns cache
 killall -HUP mDNSResponder
 
-set +e
-echo pi comes up as $(host alarmpi)
-set -e
+hostInfo=$(host alarmpi) || (printf "\nfailed to find pi, try restarting it and completing manually\n"; exit 1)
 
-# #############
-#  NEED TO TEST THIS!
-# #############
+echo pi comes up as $hostInfo
 
 echo && echo Setting up ssh connectivity for ${ssh_user} to root user on raspberry pi, you may be prompted for ssh key passphrases
 # the -l on the bash is needed to get the proper PATH
@@ -98,3 +94,5 @@ sleep 40
 
 echo Removing any old keys for ${NEWHOSTNAME} and adding new host key
 su -l ${ssh_user} -c "bash -l <(curl -fsSL https://raw.github.com/plockc/DevOps/master/remoteSshSetup.sh) root@${NEWHOSTNAME}"
+
+printf "\nCompleted Arch Install to Pi from your Mac, you can ssh root@${NEWHOSTNAME} as ${ssh_user}\n"

@@ -9,9 +9,9 @@ if (( `id -u` != 0 )); then
   exit 1
 fi
 
-if [[ $# == 0 ]]; then echo && echo Please have the image path as the first argument && echo && exit; fi
+if [[ $# == 0 ]]; then echo && echo Please have the image path as the first argument && echo && exit 1; fi
 
-if ! test -f "$1"; then echo && echo Image file "$1" does not exist && echo && exit; fi
+if ! test -f "$1"; then echo && echo Image file "$1" does not exist && echo && exit 1; fi
 
 echo && read -p "Eject and remove SD Card if it is inserted then hit enter to continue"
 
@@ -25,7 +25,7 @@ disksAfter=`diskutil list | awk '/^\/dev\/disk/ {print $0}'`
 
 newDisk=`comm -3 <(echo $disksBefore | xargs -n 1 echo) <(echo $disksAfter | xargs -n 1 echo) | awk '{print $1}'`
 
-if [[ $newDisk == "" ]]; then echo && echo No new disk found! && echo && exit; else echo && echo Found $newDisk; fi
+if [[ $newDisk == "" ]]; then echo && echo No new disk found && echo && exit 1; else echo && echo Found $newDisk; fi
 
 newDiskEscaped=${newDisk//\//\\\/} # convert / to escaped slash: \/
 

@@ -25,7 +25,7 @@ disksAfter=`diskutil list | awk '/^\/dev\/disk/ {print $0}'`
 
 newDisk=`comm -3 <(echo $disksBefore | xargs -n 1 echo) <(echo $disksAfter | xargs -n 1 echo) | awk '{print $1}'`
 
-if [[ $newDisk == "" ]]; then echo && echo No new disk found && echo && exit 1; else echo && echo Found $newDisk; fi
+if [[ $newDisk == "" ]]; then printf "\nNo new disk found\n\n"; exit 1; else echo && echo Found $newDisk; fi
 
 newDiskEscaped=${newDisk//\//\\\/} # convert / to escaped slash: \/
 

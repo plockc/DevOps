@@ -85,7 +85,7 @@ fi
 ####################
 
 mkdir -p /usr/share/webapps/pico/cache
-curl "https://github.com/gilbitron/Pico/archive/0.7.tar.gz" \
+curl --location "https://github.com/gilbitron/Pico/archive/0.7.tar.gz" \
   | tar --directory /usr/share/webapps/pico --strip-components=1 -zxvf -
 
 

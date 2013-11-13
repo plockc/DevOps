@@ -18,7 +18,7 @@ pacman --noconfirm -S --needed php-apc php-cgi php-sqlite lighttpd dokuwiki
 # CONFIGURE PHP CACHE
 #####################
 
-sed -ibak 's/;extension=apc.so/extension=apc.so/' /etc/php/conf.d/apc.ini # enable APC caching
+sed -ibak 's/;extension=apc.so/extension=apc.so/' /etc/php/conf.d/apc*.ini # enable APC caching
 
 ####################
 # CONFIGURE FASTCGI

@@ -37,7 +37,7 @@ while getopts ":hn:p:" opt; do case $opt in
 	*)  usage; echo "Unimplemented option: -$OPTARG" >&2; exit 1;; # catch-all
 esac; done
 
-pacman --noconfirm -Sy --needed php augeas darkstat unzip dnsutils rsync screen
+pacman --noconfirm -Sy --needed php augeas darkstat darkhttpd unzip dnsutils rsync screen git dtach
 ln --force -s /usr/bin/darkstat /usr/sbin/darkstat
 
 echo && echo Setting new root password

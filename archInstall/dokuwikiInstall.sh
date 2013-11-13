@@ -25,6 +25,7 @@ sed -ibak 's/;extension=apc.so/extension=apc.so/' /etc/php/conf.d/apc*.ini # ena
 ####################
 
 mkdir -p /etc/lighttpd/conf.d
+chmod a+x /var/lib/dokuwiki
 
 # include fastcgi.conf
 grep -q "conf.d/fastcgi.conf" /etc/lighttpd/lighttpd.conf \
@@ -62,8 +63,8 @@ grep -q "conf.d/dokuwiki.conf" /etc/lighttpd/lighttpd.conf \
 test -f /etc/lighttpd/conf.d/dokuwiki.conf || cat > /etc/lighttpd/conf.d/dokuwiki.conf << EOF
 server.modules += ( "mod_access", "mod_alias" )
 alias.url += ("/wiki" => "/usr/share/webapps/dokuwiki/")
-static-file.exclude-extensions = ( ".php" )
-\$HTTP["url"] =~ "/(\.|_)ht" { url.access-deny = ( "" ) }
+static-file.exclude-extensions += ( ".php" )
+\$HTTP["url"] =~ "/(\.|_)ht" { url.access-deny += ( "" ) }
 \$HTTP["url"] =~ "^/wiki/(bin|data|inc|conf)/+.*"  { url.access-deny = ( "" ) }
 EOF
 
@@ -131,6 +132,7 @@ chown -R http:http /usr/share/webapps/dokuwiki
 
 chmod 744 /var/lib/dokuwiki
 
-systemctl start lighttpd
+systemctl enable lighttpd
+systemctl restart lighttpd
 
 echo you can go to /wiki to view your wiki

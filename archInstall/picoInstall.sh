@@ -102,7 +102,7 @@ grep -q "conf.d/pico.conf" /etc/lighttpd/lighttpd.conf \
 
 # create the dokuwiki configuration for lighttpd
 test -f /etc/lighttpd/conf.d/pico.conf || cat > /etc/lighttpd/conf.d/pico.conf << EOF
-server.modules += ( "mod_access", "mod_alias", "mod_rewrite" )
+server.modules += ( "mod_access", "mod_alias", "mod_rewrite", "mod_redirect" )
 alias.url += ("/pico" => "/usr/share/webapps/pico/")
 static-file.exclude-extensions += ( ".php" )
 \$HTTP["url"] =~ "/(\.|_)ht" { url.access-deny += ( "" ) }
@@ -114,6 +114,9 @@ url.rewrite-once = (
 url.rewrite-if-not-file = (
     "^/pico/(.*)$" => "/pico/index.php"
 )
+
+url.redirect += ( "^/$" => "/pico/" )
+
 EOF
 
 # create the dokuwiki local configuration if there is none

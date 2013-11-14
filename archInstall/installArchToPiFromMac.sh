@@ -22,8 +22,6 @@ Usage: $(basename "$0") [switches] [--]
                                        the command, not to sudo
                                        sudo bash -c '$0 -p3 ... 3<<<"password"'
 
-Hint: if you see end of file without any output,
-      make sure you can ssh without problems
 EOF
 }
 

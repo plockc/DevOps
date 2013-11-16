@@ -4,23 +4,37 @@
 # can set BACKUP_ROOT_DIR for the root of the backups
 #    backups will be full paths under BACKUP_ROOT_DIR/
 
-# can debug the launchdaemon with
-# sudo launchctl log level debug
-# tail -f /var/log/system.log
-# and you might need <key>StandardOutPath</key><string>/var/log/progname.log</string>
-#                    <key>StandardErrorPath</key><string>/var/log/progname_err.log</string>
+# can debug the launchdaemon with "sudo launchctl log level debug, tail -f /var/log/system.log"
+# 
+# return logging back to normal with 
+# sudo launchctl log level error
+
+# temporarily you can add to the plist dictionary:
+#      <key>StandardOutPath</key><string>/var/log/progname.log</string>
+#      <key>StandardErrorPath</key><string>/var/log/progname_err.log</string>
+
+# you can see your jobs with "launchctl list | grep backup"
+
+# rerunning this file will unload the daemon and load it back for you
+
+# to manually remove the job, you need to unload it from launchctl, mark it as disabled, and delete the file
+# find the file in /Libary/LaunchDaemons (for root) or ~/Library/LaunchAgents (for users)
+# launchctl unload -w <path>/${reverseHost}.backup.${remoteUser}.${label}.${interval}.plist
+# rm <path>/${reverseHost}.backup.${remoteUser}.${label}.${interval}.plist
 
 # some good plist info: http://www.mactech.com/articles/mactech/Vol.25/25.09/2509MacEnterprise-launchdforLunch/index.html
 
 set -e
 
 function usage {
-	echo "$0" \<label\> \<backupTemplateFile\> \[user\@\]remoteHost 
+	echo "$0" \<simple-label\> \<backupTemplateFile\> \[user\@\]remoteHost emailRecipient
 }
 
 if (( $# == 0 )); then usage; exit 1; fi
 
-label=$1 # if label is empty, then set to 'default'
+label=$1
+emailRecipient="$4"
+emailRecipient=${emailRecipient:=$USER}
 
 # GET THE REMOTE HOST
 remoteHost=${3#*@} # sucks away all the leading characters until @
@@ -47,7 +61,7 @@ backupRootDir=${BACKUP_ROOT_DIR:=${defaultBackupRootDir}}
 # GET BACKUP DIR FOR THIS BACKUP
 backupDestinationDir=${backupRootDir}/${remoteHost}-${remoteUser}-${label}
 if [[ -e "${backupDestinationDir}" && ! $(find ${backupDestinationDir} -maxdepth 0 -empty) ]]; then
-	echo && echo You must chose a non-existant or empty directory
+	printf "\nYou must chose a non-existant or empty directory\n"
 	exit 1
 elif [[ ! -e "${backupDestinationDir}" ]]; then
 	echo && echo Creating dir ${backupDestinationDir}
@@ -85,44 +99,45 @@ fi
 (( `id -u` == 0 )) && launchctlDir='/Library/LaunchDaemons' || launchctlDir=~/Library/LaunchAgents
 
 function createPlist {
-local interval=$1
-local schedule=$2
-plistFile="${launchctlDir}/${reverseHost}.backup.${remoteUser}.${label}.${interval}.plist"
-# if it is already there unload it first so we can load the new one
-if [[ -e ${plistFile} ]]; then
-	echo unloading old ${plistFile}
-	launchctl unload ${plistFile}
-fi
-# this treat the path passed into the script as a template with bash variable expansion
-# we have to update the runtime environment of bash as the locals are not copied
-# note frist tab is ignored with <<- allowing us to pretty print
-cat >${plistFile} <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>${reverseHost}.backup.${remoteUser}.${label}.${interval}</string>
-	<key>LowPriorityIO</key><true/>
-    <key>ProgramArguments</key>
-    <array>
-		<string>`which rsnapshot`</string>
-		<string>-c</string>
-		<string>${rsnapshotConfig}</string>
-		<string>${interval}</string>
-    </array>
-    <key>StartCalendarInterval</key>
-    <array>
-		<dict>
-		  ${schedule}
-		</dict>
-    </array>
-</dict>
-</plist>
-EOF
-chmod 644 ${plistFile}
-launchctl load ${plistFile}
-echo && echo created and launched ${plistFile}
+	local interval=$1
+	local schedule=$2
+	plistFile="${launchctlDir}/${reverseHost}.backup.${remoteUser}.${label}.${interval}.plist"
+	# if it is already there unload it first so we can load the new one
+	if [[ -e ${plistFile} ]]; then
+		echo unloading old ${plistFile}
+		launchctl unload ${plistFile}
+	fi
+
+	# this treat the path passed into the script as a template with bash variable expansion
+	# we have to update the runtime environment of bash as the locals are not copied
+	# note first tab is ignored with <<- allowing us to pretty print
+	cat >${plistFile} <<-EOF
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+	<plist version="1.0">
+	<dict>
+	  <key>Label</key><string>${reverseHost}.backup.${remoteUser}.${label}.${interval}</string>
+	  <key>LowPriorityIO</key><true/>
+	  <key>ProgramArguments</key>
+	  <array>
+	    <string>/bin/bash</string>
+	    <string>-c</string>
+	    <string>`which rsnapshot` -c ${rsnapshotConfig} ${interval}  2&gt;&amp;1 | /usr/bin/mail -E -s ${reverseHost}.backup.${remoteUser}.${label}.${interval} ${emailRecipient}</string>
+	  </array>
+	  <key>StartCalendarInterval</key>
+	  <array>
+	    <dict>
+	      ${schedule}
+	    </dict>
+	  </array>
+	  <!-- this lets the spawn mail send complete - http://unflyingobject.com/blog/posts/996 -->
+	  <key>AbandonProcessGroup</key><true/>
+	</dict>
+	</plist>
+	EOF
+	chmod 644 ${plistFile}
+	launchctl load ${plistFile}
+	echo && echo created and launched ${plistFile}
 }
 
 function keyVal { echo "<key>${1}</key><integer>${2}</integer>"; }

@@ -13,9 +13,8 @@ Usage: $(basename "$0") [-d] [switches]
     -d              decrypt
     -f file         act on file instead of stdin
     -o file         send output to file instead of stdout or if 
-                    input file named "file" provided and encrypting, "file.aes",
-                    if decrypting, "file.clear"
-    -p descriptor   The numerical id (use 0 for stdin) to read the password
+                    input file named "file" provided and encrypting, "file.aes"
+    -p descriptor   The numerical id >2 to read the password
                     instead of stdin
 
 Examples:
@@ -27,34 +26,33 @@ EOF
 }
 
 encrypt=true
-extension=".aes"
 PASSWORD_FD=1
 
 # leading ':' to run silent, 'f:' means f need an argument, 'h' is just an option
 while getopts ":hdf:p:o:" opt; do case $opt in
     h)  usage; exit 0;;
-    d)  encrypt=false; extension=".clear";;
+    d)  encrypt=false;;
     f)  SOURCE_FILE="${OPTARG}";;
     o)  TARGET_FILE="${OPTARG}";;
     p)  PASSWORD_FD="${OPTARG}";;
 esac; done
 
-if [[ -n "${SOURCE_FILE}" ]]; then
-    # set target file if it is not set already to the requested source file with .aes at the end
-    : ${TARGET_FILE:="${SOURCE_FILE}${extension}"}
-else
-    # set target file to stdout if not already set
-    : ${TARGET_FILE:=/dev/stdout}
-    SOURCE_FILE=/dev/stdin
+# if encrypted, source file is set but not target, then assume inputFileName.aes is the target filename
+if $encrypt && [[ -n "${SOURCE_FILE}" && -z "${TARGET_FILE}" ]]; then
+    TARGET_FILE="${SOURCE_FILE}.aes"
 fi
 
+# set target and source defaults if not set already
+: ${TARGET_FILE:=/dev/stdout}
+: ${SOURCE_FILE:=/dev/stdin}
+
 # grab password from stdin (file descriptor 0) or the one specified by user
-if [[ -z "${PASSWORD_FD}" ]]; then read -u $(cat /dev/fd/${PASSWORD_FD}) PASSWORD; fi
+read -u "${PASSWORD_FD}" PASSWORD
 
 if $encrypt; then
     # -e for encrypt, -p for print salt and iv
     3<<<"${PASSWORD}" openssl enc -e -p -pass fd:3 -in "${SOURCE_FILE}" -aes-256-cbc -base64 \
-        | grep -v ^key | gzip \
+        | grep -v ^key | gzip -f \
         > "${TARGET_FILE}"
 else
     gzip -dc "${SOURCE_FILE}" \

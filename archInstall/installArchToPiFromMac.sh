@@ -13,7 +13,7 @@ Usage: $(basename "$0") [switches]
                        Defaults to the user that is running this as sudo (or root if root)
       -n host.domain   New hostname and domain for the pi
       -h               This help
-      -p descriptor    The numerical id (like 0 for stdin) to read the new root password
+      -p descriptor    The numerical id >2 to read the new root password
                        This is used by sshpass to help set up ssh connectivity to avoid
                        terminal input
                        Examples: $0 -p3 ... 3<<<"password"
@@ -39,7 +39,7 @@ while getopts ":f:hu:n:p:" opt; do case $opt in
 	h)  usage; exit 0;;
 	    # user passes in the file descriptor for this script to read in the password
 	    # then we will use fd3 to pass it into the archiPiPostInstall script
-	p)  PASSFLAG="-p 3"; NEWPASSWORD=$(cat /dev/fd/${OPTARG});;
+	p)  PASSFLAG="-p 3"; NEWPASSWORD=$(cat /dev/fd/6${OPTARG});;
 	u)  ssh_user="${OPTARG}";;
 	n)  NEWHOSTNAME="${OPTARG}"; NEWHOSTNAME_POST_INSTALL_FLAG="-n ${NEWHOSTNAME}";;
 	f)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG" does not exist for -f; exit 1; fi

@@ -7,13 +7,13 @@ function usage() {
 cat <<EOF
 $(basename "$0"): will install and configure arch linux on a raspberry pi
     requires root priviliges
-Usage: $(basename "$0") [switches] [--]
+Usage: $(basename "$0") [switches]
       -f archImage     Location of the arch linux image .iso
       -u user          Local user that needs to be set up for ssh
                        Defaults to the user that is running this as sudo (or root if root)
       -n host.domain   New hostname and domain for the pi
       -h               This help
-      -p descriptor    The numerical id (like 1 for stdin) to read the new root password
+      -p descriptor    The numerical id (like 0 for stdin) to read the new root password
                        This is used by sshpass to help set up ssh connectivity to avoid
                        terminal input
                        Examples: $0 -p3 ... 3<<<"password"

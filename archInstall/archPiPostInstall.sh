@@ -37,7 +37,8 @@ while getopts ":hn:p:" opt; do case $opt in
 	*)  usage; echo "Unimplemented option: -$OPTARG" >&2; exit 1;; # catch-all
 esac; done
 
-pacman --noconfirm -Sy --needed augeas darkstat darkhttpd unzip dnsutils rsync screen git dtach vim
+# php is needed for how I implemented the new root password
+pacman --noconfirm -Sy --needed php augeas darkstat darkhttpd unzip dnsutils rsync screen git dtach vim
 ln --force -s /usr/bin/darkstat /usr/sbin/darkstat
 
 echo && echo Setting new root password
@@ -93,4 +94,6 @@ echo "PRE_UP=\"sleep 5\"" >> /etc/network.d/ethernet-eth0
 
 printf "\nRebooting, please wait about 28 seconds before reboot to complete\n"
 
-reboot #would be nice to figure out how to cleanly exit here
+# I think this lets me reboot cleanly and gives ssh and nice exit code
+nohup bash -c "(sleep 3; reboot)" &
+exit 0

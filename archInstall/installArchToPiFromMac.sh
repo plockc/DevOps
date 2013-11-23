@@ -39,7 +39,7 @@ while getopts ":f:hu:n:p:" opt; do case $opt in
 	h)  usage; exit 0;;
 	    # user passes in the file descriptor for this script to read in the password
 	    # then we will use fd3 to pass it into the archiPiPostInstall script
-	p)  PASSFLAG="-p 3"; NEWPASSWORD=$(cat /dev/fd/6${OPTARG});;
+	p)  PASSFLAG="-p 3"; NEWPASSWORD=$(cat /dev/fd/${OPTARG});;
 	u)  ssh_user="${OPTARG}";;
 	n)  NEWHOSTNAME="${OPTARG}"; NEWHOSTNAME_POST_INSTALL_FLAG="-n ${NEWHOSTNAME}";;
 	f)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG" does not exist for -f; exit 1; fi

@@ -52,7 +52,6 @@ if grep -q "${defaultPass//\$/\\\$}" /etc/shadow; then
         echo
         read -s -p "Please confirm: "
         echo
-
         if [[ ! "$REPLY" = "$NEW_PASSWORD" ]]; then
             echo Passwords did not match, please try again
             exit
@@ -94,6 +93,8 @@ echo "PRE_UP=\"sleep 5\"" >> /etc/network.d/ethernet-eth0
 
 printf "\nRebooting, please wait about 28 seconds before reboot to complete\n"
 
+# problem with rebooting while in a shell script is that it kills the shell and gives
+# an ssh session a failure error code
 # I think this lets me reboot cleanly and gives ssh and nice exit code
-nohup bash -c "(sleep 3; reboot)" &
-exit 0
+
+dtach -n reboot.tty bash -c "sleep 3; systemctl reboot"

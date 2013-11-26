@@ -135,4 +135,14 @@ chmod 755 /var/lib/dokuwiki
 systemctl enable lighttpd
 systemctl restart lighttpd
 
-echo you can go to /wiki to view your wiki
+cat <<EOF
+==============================
+Installation Complete
+==============================
+you can go to /wiki to view your wiki
+
+files are installed at /usr/share/webapps/dokuwiki
+                       /etc/webapps/dokuwiki
+                       /var/lib/dokuwiki/data
+
+EOF

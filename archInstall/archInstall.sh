@@ -18,9 +18,9 @@ pacman --noconfirm -Syy ntp && ntpd -gq && hwclock -w
 
 parted --script --align optimal /dev/sda \
   mklabel msdos \
-  mkpart primary ext4 63s 100MB \
-  mkpart primary ext4 100MB 20GB \
-  mkpart primary linux-swap 20GB 21GB
+  mkpart primary ext4 63s 100M \
+  mkpart primary ext4 100MB -1G \
+  mkpart primary linux-swap -1G -1s
 
 partprobe /dev/sda
 
@@ -52,7 +52,7 @@ locale-gen # edit /etc/locate.gen possibly
 #systemctl enable dhcpcd@enp0s5
 # install network device is eth0 but runtime is emp0s5, so have to do it manually
 ln -s '/usr/lib/systemd/system/dhcpcd\@.service' '/etc/systemd/system/multi-user.target.wants/dhcpcd\@enp0s5.service'
-systemctl enable sshd.service darkstat ntpd.service
+systemctl enable sshd.service darkstat ntpd.service dhcpcd
 
 ## CHANGE ROOT PASSWORD
 

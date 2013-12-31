@@ -81,11 +81,11 @@ echo && echo Setting up timezone
 # SETUP TIMEZONE
 ln --force -s /usr/share/zoneinfo/US/Pacific /etc/localtime
 
-echo && echo Enabling darkstat
+# echo && echo Enabling darkstat
 # systemctl enable darkstat
 
-echo && echo Resizing filesystem to match the full partition size
 # RESIZE THE FILESYSTEM TO MATCH PARTITION SIZE
+echo && echo Resizing filesystem to match the full partition size
 resize2fs /dev/mmcblk0p2
 
 # let things settle down before going with dhcp else ip will be ignored for some reason

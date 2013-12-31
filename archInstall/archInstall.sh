@@ -16,7 +16,7 @@ fi
 
 pacman --noconfirm -Syy ntp && ntpd -gq && hwclock -w
 
-parted --script --align optimal /dev/sda \
+parted --script --align optimal -- /dev/sda \
   mklabel msdos \
   mkpart primary ext4 63s 100M \
   mkpart primary ext4 100MB -1G \

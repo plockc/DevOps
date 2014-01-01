@@ -69,7 +69,7 @@ mkswap /dev/sda3
 ######################################
 # INSTALL PACKAGES
 ######################################
-pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync screen
+pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux
 
 ######################################
 # BASIC CONFIGURATION
@@ -80,6 +80,7 @@ echo "/dev/sda3   swap   swap   defaults   0   0" >> /mnt/etc/fstab
 ln -s /usr/share/zoneinfo/US/Pacific /mnt/etc/localtime
 
 echo LANG=en_US.UTF-8 > /mnt/etc/locale.conf
+sed -i.bak 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /mnt/etc/locale.gen
 
 echo $NEW_HOSTNAME > /mnt/etc/hostname
 

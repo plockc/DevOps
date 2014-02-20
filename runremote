@@ -3,24 +3,22 @@
 # runremote
 # Written by Chris Plock
 
-# TODO: provide option for command as a string argument
 # TODO: wikitize
 # TODO: advertise
-# TODO: tee option to capture output to disk, with or without merge, and with or without box labels
-# TODO: other multitail options like line buffer or labelling
-# TODO: option to run serially straight to console
+# TODO: tee option to capture output to disk, with or without merge, and with or without box names as a prefix in log output
+# TODO: option to run serially straight to console instead of using multitail
 # TODO: graceful degrade to serial execution if no dvtm or multitail
 # TODO: option to dvtm instead of multitail, or screen
 
 # try -a and -g options to send to console for further processing, maybe with no close_closed_windows and maybe with hostname
-# multitail requires the terminal, so we have to get commands either through a file or through interactive input
 
 function usage() {
 cat <<EOF
 runremote: run the same commands on multiple boxes and observer or process output
 Usage: $(basename "$0") [switches] [--] remoteHost [remoteHost2 ...]
       -f script          Provide a local script to be run on each remote machine
-      -c                 Close tail window for remote host after command completes,
+      -c command         Execute command on remote machine
+      -x                 Close tail window for remote host after command completes,
                            and exit after the last closes
       -t remoteFileName  tail remote file/s (has to be done as one argument)
       -h                 This help
@@ -32,56 +30,45 @@ EOF
 autoCloseWindows="no"
 
 # leading ':' to run silent, 'f:' means f need an argument, 'c' is optional
-while getopts ":f:t:c" opt; do case $opt in
+while getopts ":f:t:c:x" opt; do case $opt in
 	h)  usage; exit 0;;
 	f)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG does not exist for -f"; exit 1; fi
-	    commandFile="$OPTARG";;
-	c)  autoCloseWindows="yes";;
-	t)  tailFile="$OPTARG";;
-	\?) usage; echo "Invalid option: -$OPTARG" >&2; exit 1;;
+        cmdOptions="${cmdOptions}${opt}"; encodedCommands="$(<$commandFile)";;
+	x)  autoCloseWindows="yes";;
+    c)  cmdOptions="${cmdOptions}${opt}"; encodedCommands="$OPTARG";;
+	t)  cmdOptions="${cmdOptions}${opt}"; encodedCommands="tail -f $tailFile";;
+    \?) usage; echo -e "\nERROR: Invalid option: -$OPTARG" >&2; exit 1;;
         # this happens when silent and missing argument for option
-	:)  usage; echo "-$OPTARG requires an argument" >&2; exit 1;;
-	*)  usage; echo "Unimplemented option: -$OPTARG" >&2; exit 1;; # catch-all
+	:)  usage; echo -e "\nERROR: -$OPTARG requires an argument" >&2; exit 1;;
 esac; done
 
-if [[ -n "${tailFile}" && -n "${commandFile}" ]]; then echo "You cannot combine -t and -f"; exit 1; fi
-if [[ -n "${tailFile}" && "$autoCloseWindows" = "yes" ]]; then echo "You cannot combine -t and -c"; exit 1; fi
-
+if (( ${#cmdOptions} > 1 )); then echo "You can only have one of -f, -c, or -t"; exit 1; fi
 
 # consume the option flags and leave the list of server names to assign to "remoteBoxes"
 shift $((OPTIND-1))
-remoteBoxes="$@"
-
 if (( $# == 0 )); then usage; echo "No remote boxes specified"; exit 1; fi
 
-if [[ -n "${tailFile}" ]]; then
-	echo "tailing $tailFile";
-	encodedCommands=$(echo "tail -f $tailFile" | base64)
-	echo $encodedCommands
-	echo command is $(base64 --decode <<< ${encodedCommands})
-elif [[ -z "${commandFile}" ]]; then ## true when unset or empty string
+remoteBoxes="$@"
+
+if [[ -z "${encodedCommands}" ]]; then ## true when unset or empty string
 	if [[ -t 0 ]]; then # true if stdin is a terminal, if not, it was piped in
 		echo "Enter commands you would like to be run remotely, then Ctl-d on a newline to finish" >&2
 	else
-		echo "Stdin needs to be console, try to get your commands to look like a file, for example:"
+		echo "multitail requires stdin to be a terminal/interactive, try to get your commands to look like a file, for example:"
 		commands=$(cat)
 		echo "  $(basename $0) -f /dev/fd/3 $remoteBoxes 3<<< \"${commands}\""
 		echo "  $(basename $0) -f <(cat <<< \"${commands}\") $remoteBoxes"
 		echo "  (cat <<< \"${commands}\" | 3>&0 $(basename $0) -f /dev/fd/3 $remoteBoxes <&4) 4>&0"
 		exit 1;
 	fi
-	encodedCommands="$(cat | base64)"
-	BASH_CMD="bash"
-else
-	encodedCommands=$(cat "${commandFile}" | base64)
-	BASH_CMD="bash -i"
+	encodedCommands="$(cat)"
 fi
 
 CMD="multitail -M 5000 -o close_closed_windows:${autoCloseWindows}"
 
 for box in ${remoteBoxes}; do
 	# the backslash on | is needed to avoid bash being run locally
-	CMD="$CMD -t ${box} -l 'ssh ${box} base64 --decode --ignore-garbage \<\<\< ${encodedCommands} \| bash'"
+    CMD="$CMD -t ${box} -l \"$(printf "ssh -t $box $encodedCommands")\""
 done
  
 eval $CMD

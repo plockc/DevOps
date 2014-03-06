@@ -36,7 +36,7 @@ while getopts ":f:t:c:x" opt; do case $opt in
         cmdOptions="${cmdOptions}${opt}"; encodedCommands="$(<$commandFile)";;
 	x)  autoCloseWindows="yes";;
     c)  cmdOptions="${cmdOptions}${opt}"; encodedCommands="$OPTARG";;
-	t)  cmdOptions="${cmdOptions}${opt}"; encodedCommands="tail -f $tailFile";;
+	t)  cmdOptions="${cmdOptions}${opt}"; encodedCommands="tail -f $OPTARG";;
     \?) usage; echo -e "\nERROR: Invalid option: -$OPTARG" >&2; exit 1;;
         # this happens when silent and missing argument for option
 	:)  usage; echo -e "\nERROR: -$OPTARG requires an argument" >&2; exit 1;;
@@ -65,10 +65,13 @@ if [[ -z "${encodedCommands}" ]]; then ## true when unset or empty string
 fi
 
 CMD="multitail -M 5000 -o close_closed_windows:${autoCloseWindows}"
+#CMD="dvtm"
+echo $CMD
 
+echo going to set up commands $encodedCommands
 for box in ${remoteBoxes}; do
-	# the backslash on | is needed to avoid bash being run locally
-    CMD="$CMD -t ${box} -l \"$(printf "ssh -t $box $encodedCommands")\""
+    CMD=$(printf "%s -t %s -l 'ssh -T %s %q'" "$CMD" $box $box "$encodedCommands")
+    #CMD=$(printf "%s 'ssh -t %s %q | less'" "$CMD" $box "$encodedCommands")
 done
  
 eval $CMD

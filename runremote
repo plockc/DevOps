@@ -33,7 +33,7 @@ autoCloseWindows="no"
 while getopts ":f:t:c:x" opt; do case $opt in
 	h)  usage; exit 0;;
 	f)  if [[ ! -e "$OPTARG" ]]; then usage; echo "\$OPTARG does not exist for -f"; exit 1; fi
-        cmdOptions="${cmdOptions}${opt}"; encodedCommands="$(<$commandFile)";;
+        cmdOptions="${cmdOptions}${opt}"; encodedCommands="$(<$OPTARG)";;
 	x)  autoCloseWindows="yes";;
     c)  cmdOptions="${cmdOptions}${opt}"; encodedCommands="$OPTARG";;
 	t)  cmdOptions="${cmdOptions}${opt}"; encodedCommands="tail -f $OPTARG";;
@@ -66,9 +66,7 @@ fi
 
 CMD="multitail -M 5000 -o close_closed_windows:${autoCloseWindows}"
 #CMD="dvtm"
-echo $CMD
 
-echo going to set up commands $encodedCommands
 for box in ${remoteBoxes}; do
     CMD=$(printf "%s -t %s -l 'ssh -T %s %q'" "$CMD" $box $box "$encodedCommands")
     #CMD=$(printf "%s 'ssh -t %s %q | less'" "$CMD" $box "$encodedCommands")

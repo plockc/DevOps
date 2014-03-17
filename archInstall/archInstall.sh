@@ -51,9 +51,9 @@ HOSTNAME=$NEW_HOSTNAME
 ######################################
 parted --script --align optimal -- /dev/sda \
   mklabel msdos \
-  mkpart primary ext4 63s 100M \
-  mkpart primary ext4 100MB -1G \
-  mkpart primary linux-swap -10G -1s
+  mkpart primary ext4 1 100M \
+  mkpart primary ext4 100M -1G \
+  mkpart primary linux-swap -1G -1s
 partprobe /dev/sda
 
 mkfs.ext4 -q /dev/sda2

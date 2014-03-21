@@ -49,6 +49,8 @@ HOSTNAME=$NEW_HOSTNAME
 ######################################
 # CREATE PARTITIONS AND FILESYSTEMS
 ######################################
+# alignment guidance at http://rainbow.chard.org/2013/01/30/how-to-align-partitions-for-best-performance-using-parted/
+#   and at http://h10025.www1.hp.com/ewfrf/wc/document?cc=uk&lc=en&dlc=en&docname=c03479326
 parted --script --align optimal -- /dev/sda \
   mklabel msdos \
   mkpart primary ext4 1 100M \
@@ -69,7 +71,7 @@ mkswap /dev/sda3
 ######################################
 # INSTALL PACKAGES
 ######################################
-pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux
+pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux gnu-netcat
 
 ######################################
 # BASIC CONFIGURATION

@@ -68,7 +68,7 @@ if grep -q alarmpi <<< `hostname`; then
   if [[ -z "${NEWHOSTNAME}" ]]; then
 	  read -p "Please enter the full host name for this Pi: "
 	  NEWHOSTNAME=$REPLY
-	  if [[ $HOSTNAME == "" ]]
+	  if [[ $NEWHOSTNAME == "" ]]
 	  then
 		echo Please try again with a valid host name
 		exit;

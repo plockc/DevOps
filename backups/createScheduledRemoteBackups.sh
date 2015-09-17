@@ -27,7 +27,7 @@
 set -e
 
 function usage {
-	echo "$0" \<simple-label\> \<backupTemplateFile\> \[user\@\]remoteHost emailRecipient
+	echo "$0" \<simple-label\> \<backupTemplateFile\> \[user\@\]remoteHost [emailRecipient]
 }
 
 if (( $# == 0 )); then usage; exit 1; fi

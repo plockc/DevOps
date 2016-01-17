@@ -4,6 +4,8 @@
 
 # TODO: options for a Arch package cache
 
+DEVICE=sda
+
 set -e
 
 # set the clock
@@ -11,8 +13,8 @@ pacman --noconfirm -Syy --needed ntp && ntpd -gq && hwclock -w
 
 # confirm that we want to destroy /dev/sda completely
 echo Checking mounts . . .
-cat /proc/mounts | grep sda && (echo Error, /dev/sda is used) || echo /dev/sda does not appear to be used
-read -p "Are you sure you want to completely wipe /dev/sda? " -r
+cat /proc/mounts | grep $DEVICE && (echo Error, /dev/${DEVICE} is used) || echo /dev/${DEVICE} does not appear to be used
+read -p "Are you sure you want to completely wipe /dev/${DEVICE}? " -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
     echo Aborting
@@ -51,27 +53,30 @@ HOSTNAME=$NEW_HOSTNAME
 ######################################
 # alignment guidance at http://rainbow.chard.org/2013/01/30/how-to-align-partitions-for-best-performance-using-parted/
 #   and at http://h10025.www1.hp.com/ewfrf/wc/document?cc=uk&lc=en&dlc=en&docname=c03479326
-parted --script --align optimal -- /dev/sda \
+#
+# If the old disk had lvm, then you might need to vgremove the volume groups before you can parition
+#
+parted --script --align optimal -- /dev/${DEVICE} \
   mklabel msdos \
   mkpart primary ext4 1 100M \
   mkpart primary ext4 100M -1G \
   mkpart primary linux-swap -1G -1s
-partprobe /dev/sda
+partprobe /dev/${DEVICE}
 
-mkfs.ext4 -q /dev/sda2
-mount -t ext4 /dev/sda2 /mnt
+mkfs.ext4 -q /dev/${DEVICE}2
+mount -t ext4 /dev/${DEVICE}2 /mnt
 
-mkfs.ext4 -q /dev/sda1
+mkfs.ext4 -q /dev/${DEVICE}1
 mkdir -p /mnt/boot
-mount -t ext4 /dev/sda1 /mnt/boot
+mount -t ext4 /dev/${DEVICE}1 /mnt/boot
 
 # this does not seem to be working all the way
-mkswap /dev/sda3
+mkswap /dev/${DEVICE}3
 
 ######################################
 # INSTALL PACKAGES
 ######################################
-pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux gnu-netcat
+pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux gnu-netcat wpa_supplicant dialog alsa-utils vim git
 
 ######################################
 # BASIC CONFIGURATION
@@ -97,10 +102,10 @@ mkinitcpio -p linux
 
 pacman --noconfirm -S syslinux
 
-sed -i 's/sda3/sda2/' /boot/syslinux/syslinux.cfg
+sed -i 's/${DEVICE}3/${DEVICE}2/' /boot/syslinux/syslinux.cfg
 syslinux-install_update -iam # install files(-i), set boot flag (-a), install MBR boot code (-m)
 
-locale-gen # edit /etc/locate.gen possibly
+locale-gen # I think this reads from locale.conf which we set to en_US.UTF-8 earlier
 systemctl enable sshd.service darkstat ntpd.service dhcpcd
 
 ## CHANGE ROOT PASSWORD

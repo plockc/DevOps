@@ -76,7 +76,7 @@ mkswap /dev/${DEVICE}3
 ######################################
 # INSTALL PACKAGES
 ######################################
-pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux gnu-netcat wpa_supplicant dialog alsa-utils vim git ethtool pv strace sysstat vim
+pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux gnu-netcat wpa_supplicant dialog alsa-utils vim git ethtool pv strace sysstat vim avahi nss-mdns
 
 ######################################
 # BASIC CONFIGURATION
@@ -106,7 +106,7 @@ sed -i 's/${DEVICE}3/${DEVICE}2/' /boot/syslinux/syslinux.cfg
 syslinux-install_update -iam # install files(-i), set boot flag (-a), install MBR boot code (-m)
 
 locale-gen # I think this reads from locale.conf which we set to en_US.UTF-8 earlier
-systemctl enable sshd.service darkstat ntpd.service dhcpcd
+systemctl enable sshd.service darkstat ntpd.service dhcpcd avahi-daemon
 
 ## CHANGE ROOT PASSWORD
 chpasswd << EOSF

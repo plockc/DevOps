@@ -76,7 +76,7 @@ mkswap /dev/${DEVICE}3
 ######################################
 # INSTALL PACKAGES
 ######################################
-pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux gnu-netcat wpa_supplicant dialog alsa-utils vim git ethtool pv strace systat vim
+pacstrap /mnt base base-devel openssh augeas ntp wget darkhttpd darkstat unzip dnsutils rsync dtach tmux gnu-netcat wpa_supplicant dialog alsa-utils vim git ethtool pv strace sysstat vim
 
 ######################################
 # BASIC CONFIGURATION

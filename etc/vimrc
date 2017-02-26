@@ -96,15 +96,24 @@ let g:ctrlp_max_files = 40000 " default only 10000 though this takes a while to 
 
 
 set background=dark " solarized dark background
-let g:solarized_termcolor=256
 colorscheme solarized " solarized color scheme
+set t_Co=16 " mac vim sets up 256 color, the 16 palette should be chosen from solarized Terminal app
 
 set printoptions=paper:letter,duplex:off " Setup print options for hardcopy command.
 set showcmd " some extra info about the current command at the last line of screen
 
 
-" vim-airline statusline always present
+" always show the powerline, and use unicode symbols
 set laststatus=2
+let g:Powerline_symbols = 'unicode'
+let g:Powerline_colorscheme='powerline_solarized_dark_16'
+
+
+" tagbar configuration if you install it
+" ---------------------------------------
+" one mouse click navigates
+let g:tagbar_singleclick = 1
+
 
 
 autocmd vimenter * if !argc() | NERDTree | wincmd p | endif

@@ -1,1 +1,0 @@
-archiso.local ansible_ssh_host=192.168.1.35 install_target_device=mmcblk0 new_hostname=myth-mini ansible_user=root host_key_checking=false ansible_python_interpreter=/usr/bin/python2

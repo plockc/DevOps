@@ -1,1 +1,0 @@
-archiso.local install_partition=vda new_hostname=test-arch ansible_user=root host_key_checking=false ansible_python_interpreter=/usr/bin/python2
